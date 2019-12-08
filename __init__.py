@@ -29,7 +29,8 @@ def make_offset(obj, yon=1, ust=0, yan=0):
 
 
 def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yukseklik=standard_yukseklik,
-                 modul_genislik=0, locationX=0, locationY=0, locationZ=0, isim='Sargın', collection_adı='Yusuf',
+                 modul_genislik=0, locationX=0, locationY=0, locationZ=0, isim='Sargın',
+                 collection=bpy.data.collections[0],
                  yon=1):
     bpy.ops.mesh.primitive_cube_add(size=2);
     obj = bpy.context.active_object;
@@ -57,6 +58,8 @@ def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yuksekl
             obj.location = ((x - locationY), (y - locationX), (z - locationZ));
 
     sahnedeki_objeler.append(obj);
+    bpy.ops.collection.objects_remove_all();
+    collection.objects.link(obj);
     return obj
 
 
@@ -66,36 +69,70 @@ def collection_move(x, y, z, collection_adı):
     for obj in objects_sahne:
         old_locationX, old_locationY, old_locationZ = obj.location;
         print(old_locationX)
-        obj.location = (int(x + old_locationX), int(y + old_locationY), int(z + old_locationZ));
+        obj.location = (int(old_locationX - z), int(old_locationY - x), int(old_locationZ - y));
 
 
-def kutu_Olustur():
-    for key in DataCollection.data.keys():
-        if type(DataCollection.data[key]) is dict:
-            topOfItem = list(DataCollection.data[key].keys());
-            if topOfItem[0] is 'dahil':
-                new_Obj = Obje_Olsutur(kalinlik=DataCollection.data[key]['malzeme']['kalınlık'],
-                                       derinlik=DataCollection.data[key]['en'],
-                                       yukseklik=DataCollection.data[key]['boy'],
-                                       modul_genislik=DataCollection.data[key]['en'],
-                                       locationX=DataCollection.data[key]['x_1'],
-                                       locationY=DataCollection.data[key]['y_1'],
-                                       locationZ=DataCollection.data[key]['z_1'],
-                                       yon=DataCollection.data[key].get('tip'),
-                                       isim=DataCollection.data[key]['adı']);
+def createNewCollection(CollectionName='Yusuf'):
+    collection = bpy.data.collections.new(str(CollectionName));
+    bpy.context.scene.collection.children.link(collection);
+    return bpy.data.collections[CollectionName];
+
+
+def kutu_Olustur(DataCollectionJson, CollectionName='Yusuf'):
+    collection = createNewCollection(CollectionName);
+
+    for key in DataCollectionJson.keys():
+        if type(DataCollectionJson[key]) is dict:
+            topOfItem = list(DataCollectionJson[key].keys());
+            if (topOfItem[0] is 'dahil') and (DataCollectionJson[key][topOfItem[0]] is True):
+                for dataName in topOfItem:
+                    if type(DataCollectionJson[key][dataName]) is dict:
+                        if dataName is 'malzeme':
+                            obj = Obje_Olsutur(kalinlik=DataCollectionJson[key][dataName]['kalınlık'],
+                                               derinlik=DataCollectionJson[key]['en'],
+                                               yukseklik=DataCollectionJson[key]['boy'],
+                                               modul_genislik=DataCollectionJson[key]['en'],
+                                               locationX=DataCollectionJson[key]['x_1'],
+                                               locationY=DataCollectionJson[key]['y_1'],
+                                               locationZ=DataCollectionJson[key]['z_1'],
+                                               yon=DataCollectionJson[key].get('tip'),
+                                               isim=DataCollectionJson[key]['adı'], collection=collection);
+                        else:
+                            if DataCollectionJson[key][dataName]['dahil'] is True and dataName is not 'kulp':
+                                obj = Obje_Olsutur(kalinlik=DataCollectionJson[key][dataName]['malzeme']['kalınlık'],
+                                                   derinlik=DataCollectionJson[key][dataName]['en'],
+                                                   yukseklik=DataCollectionJson[key][dataName]['boy'],
+                                                   modul_genislik=DataCollectionJson[key][dataName]['en'],
+                                                   locationX=DataCollectionJson[key][dataName]['x_1'],
+                                                   locationY=DataCollectionJson[key][dataName]['y_1'],
+                                                   locationZ=DataCollectionJson[key][dataName]['z_1'],
+                                                   yon=DataCollectionJson[key][dataName]['tip'],
+                                                   isim=DataCollectionJson[key][dataName]['adı'],
+                                                   collection=collection);
+
             else:
-                for data in list(DataCollection.data[key].keys()):
-                    if list(DataCollection.data[key][data].values())[0] is True:
-                        new_Obj2 = Obje_Olsutur(kalinlik=DataCollection.data[key][data]['malzeme']['kalınlık'],
-                                                derinlik=DataCollection.data[key][data]['en'],
-                                                yukseklik=DataCollection.data[key][data]['boy'],
-                                                modul_genislik=DataCollection.data[key][data]['boy'],
-                                                locationX=DataCollection.data[key][data].get('x_1'),
-                                                locationY=DataCollection.data[key][data].get('y_1'),
-                                                locationZ=DataCollection.data[key][data].get('z_1'),
-                                                yon=DataCollection.data[key][data]['tip'],
-                                                isim=DataCollection.data[key][data]['adı']);
+                for dataDict in topOfItem:
+                    if type(DataCollectionJson[key][dataDict]) is dict and type(
+                            DataCollectionJson[key][dataDict]) is not int:
+                        if 'dahil' in DataCollectionJson[key][dataDict]:
+                            if DataCollectionJson[key][dataDict]['dahil'] is True:
+                                obj = Obje_Olsutur(kalinlik=DataCollectionJson[key][dataDict]['malzeme']['kalınlık'],
+                                                   derinlik=DataCollectionJson[key][dataDict]['en'],
+                                                   yukseklik=DataCollectionJson[key][dataDict]['boy'],
+                                                   modul_genislik=DataCollectionJson[key][dataDict]['en'],
+                                                   locationX=DataCollectionJson[key][dataDict]['x_1'],
+                                                   locationY=DataCollectionJson[key][dataDict]['y_1'],
+                                                   locationZ=DataCollectionJson[key][dataDict]['z_1'],
+                                                   yon=DataCollectionJson[key][dataDict]['tip'],
+                                                   isim=DataCollectionJson[key][dataDict]['adı'],
+                                                   collection=collection);
 
 
 if __name__ == '__main__':
-    kutu_Olustur();
+    kutu_Olustur(DataCollection.data, DataCollection.data['modül_adı']);
+    collection_move(DataCollection.data['x1'], DataCollection.data['y1'], DataCollection.data['z1'],
+                    DataCollection.data['modül_adı']);
+
+    kutu_Olustur(DataCollection.altData, DataCollection.altData['modül_adı']);
+    collection_move(DataCollection.altData['x1'], DataCollection.altData['y1'], DataCollection.altData['z1'],
+                    DataCollection.altData['modül_adı']);
