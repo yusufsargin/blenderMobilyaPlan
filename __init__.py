@@ -1,6 +1,5 @@
 import bpy
-import mathutils
-import DataCollection
+
 import DatabaseConnection
 
 standard_kalinlik = 0.018;
@@ -43,11 +42,12 @@ def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yuksekl
     elif yon is 3:  # ust
         obj.dimensions = (derinlik, modul_genislik, kalinlik);
         obj.location = (-(derinlik / 2), -(modul_genislik / 2), (-kalinlik / 2));
-    elif yon is 1:  # kapak
+    elif (yon is 1) or (yon is 4):  # kapak
         obj.dimensions = (kalinlik, modul_genislik, yukseklik);
         obj.location = (-(kalinlik / 2), -(modul_genislik / 2), -(yukseklik / 2));
-    elif yon is None:
-        return 'Not'
+    else:
+        print(yon);
+        print('\n');
 
     if (locationX is not 0) or (locationY is not 0) or (locationZ is not 0):
         x, y, z = obj.location;
@@ -84,140 +84,177 @@ def kutu_Olustur(DataCollectionJson, CollectionName='Yusuf'):
     for key in DataCollectionJson.keys():
         if type(DataCollectionJson[key]) is dict:
             topOfItem = list(DataCollectionJson[key].keys());
-            if (topOfItem[0] is 'dahil') and (DataCollectionJson[key][topOfItem[0]] is True):
+            if DataCollectionJson[key].get('dahil', False) == True:
+                # normal sol-sag-raf cizimler
                 for dataName in topOfItem:
                     if type(DataCollectionJson[key][dataName]) is dict:
-                        if dataName is 'malzeme':
-                            if 'baza' in DataCollectionJson[key].get('adı', 'HATA'):
-                                Obje_Olsutur(kalinlik=DataCollectionJson[key][dataName].get('kalınlık', 0),
+                        if dataName == 'malzeme':
+                            # baza ve arka kuşak için çizim
+                            if ('baza' in DataCollectionJson[key].get('adı', 'HATA') or 'arka kuşak' in
+                                    DataCollectionJson[key].get('adı', 'HATA')):
+                                Obje_Olsutur(kalinlik=DataCollectionJson[key][dataName].get('kalınlık', 1.8),
                                              derinlik=DataCollectionJson[key]['boy'],
                                              yukseklik=DataCollectionJson[key].get('en', 0),
                                              modul_genislik=DataCollectionJson[key].get('boy', 0),
                                              locationX=DataCollectionJson[key]['x_1'],
                                              locationY=DataCollectionJson[key]['y_1'],
                                              locationZ=DataCollectionJson[key]['z_1'],
-                                             yon=DataCollectionJson[key].get('tip'),
+                                             yon=DataCollectionJson[key].get('tip', 1),
                                              isim=DataCollectionJson[key]['adı'], collection=collection);
                             else:
-                                Obje_Olsutur(kalinlik=DataCollectionJson[key][dataName]['kalınlık'],
+                                '''
+                                    Raf için genilik yer değiştirilmesi gerekiyor. Değişim yapıldı +1
+                                    - Buzdolabı sabit raf z değeri yanlış
+                                    - Kapak modülünde hatalar var
+                                '''
+                                if DataCollectionJson[key].get('tip') == 3:
+                                    genislik = DataCollectionJson[key].get('boy');
+                                else:
+                                    genislik = DataCollectionJson[key].get('en');
+
+                                Obje_Olsutur(kalinlik=DataCollectionJson[key][dataName].get('kalınlık', 1.8),
                                              derinlik=DataCollectionJson[key]['en'],
                                              yukseklik=DataCollectionJson[key].get('boy', 0),
-                                             modul_genislik=DataCollectionJson[key].get('en', 0),
+                                             modul_genislik=genislik,
                                              locationX=DataCollectionJson[key]['x_1'],
                                              locationY=DataCollectionJson[key]['y_1'],
                                              locationZ=DataCollectionJson[key]['z_1'],
-                                             yon=DataCollectionJson[key].get('tip'),
+                                             yon=DataCollectionJson[key].get('tip', 1),
                                              isim=DataCollectionJson[key]['adı'], collection=collection);
-                        else:
-                            if DataCollectionJson[key][dataName]['dahil'] is True and dataName is not 'kulp':
-                                obj = Obje_Olsutur(kalinlik=DataCollectionJson[key][dataName]['malzeme']['kalınlık'],
-                                                   derinlik=DataCollectionJson[key][dataName]['en'],
-                                                   yukseklik=DataCollectionJson[key][dataName]['boy'],
-                                                   modul_genislik=DataCollectionJson[key][dataName]['en'],
-                                                   locationX=DataCollectionJson[key][dataName]['x_1'],
-                                                   locationY=DataCollectionJson[key][dataName]['y_1'],
-                                                   locationZ=DataCollectionJson[key][dataName]['z_1'],
-                                                   yon=DataCollectionJson[key][dataName]['tip'],
-                                                   isim=DataCollectionJson[key][dataName]['adı'],
-                                                   collection=collection);
 
+            # Üst Ve Alt çizimi için
             else:
+                # üst çizim
                 for dataDict in topOfItem:
                     if type(DataCollectionJson[key][dataDict]) is dict and type(
                             DataCollectionJson[key][dataDict]) is not int:
-                        if 'dahil' in DataCollectionJson[key][dataDict]:
-                            if DataCollectionJson[key][dataDict]['dahil'] is True:
-                                obj = Obje_Olsutur(kalinlik=DataCollectionJson[key][dataDict]['malzeme']['kalınlık'],
-                                                   derinlik=DataCollectionJson[key][dataDict]['en'],
-                                                   yukseklik=DataCollectionJson[key][dataDict]['boy'],
-                                                   modul_genislik=DataCollectionJson[key][dataDict]['en'],
-                                                   locationX=DataCollectionJson[key][dataDict]['x_1'],
-                                                   locationY=DataCollectionJson[key][dataDict]['y_1'],
-                                                   locationZ=DataCollectionJson[key][dataDict]['z_1'],
-                                                   yon=DataCollectionJson[key][dataDict]['tip'],
-                                                   isim=DataCollectionJson[key][dataDict]['adı'],
-                                                   collection=collection);
+                        if DataCollectionJson[key][dataDict].get('dahil', False) is True:
+                            if (dataDict != 'kulp'):
+                                Obje_Olsutur(
+                                    kalinlik=DataCollectionJson[key][dataDict].get('malzeme', {"mn": 0,
+                                                                                               "kn": 0,
+                                                                                               "adı": "66_Kar Beyaz",
+                                                                                               "kalınlık": 1.8,
+                                                                                               "image": "rgb(255,255,255)"}).get(
+                                        'kalınlık', 1.8),
+                                    derinlik=DataCollectionJson[key][dataDict]['en'],
+                                    yukseklik=DataCollectionJson[key][dataDict]['boy'],
+                                    modul_genislik=DataCollectionJson[key][dataDict]['boy'],
+                                    locationX=DataCollectionJson[key][dataDict]['x_1'],
+                                    locationY=DataCollectionJson[key][dataDict]['y_1'],
+                                    locationZ=DataCollectionJson[key][dataDict]['z_1'],
+                                    yon=DataCollectionJson[key][dataDict].get('tip', 3),
+                                    isim=DataCollectionJson[key][dataDict]['adı'],
+                                    collection=collection);
 
         elif (type(DataCollectionJson[key]) is list):
             for element in DataCollectionJson[key]:
                 if type(element) is dict:
                     for keyData in element.keys():
                         if type(element[keyData]) is dict:
-                            if element[keyData]['dahil'] is True:
-                                if keyData is 'kapak':
-                                    Obje_Olsutur(kalinlik=element[keyData]['malzeme'].get('kalınlık', 1.8),
-                                                 derinlik=element[keyData].get('en', 0),
-                                                 yukseklik=element[keyData].get('boy'),
-                                                 modul_genislik=element[keyData].get('en', 0),
-                                                 locationX=element[keyData].get('x_1', 50),
-                                                 locationY=element[keyData].get('y_1', 0),
-                                                 locationZ=element[keyData].get('z_1', 0),
-                                                 yon=element[keyData].get('tip', 2),
-                                                 isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                                 collection=collection);
-                                elif element[keyData].get('tip') is 1:
-                                    Obje_Olsutur(kalinlik=element[keyData]['malzeme'].get('kalınlık', 1.8),
-                                                 derinlik=element[keyData].get('en', 0),
-                                                 yukseklik=element[keyData].get('en'),
-                                                 modul_genislik=element[keyData].get('boy', 0),
-                                                 locationX=element[keyData].get('x_1', 50),
-                                                 locationY=element[keyData].get('y_1', 0),
-                                                 locationZ=element[keyData].get('z_1', 0),
-                                                 yon=element[keyData].get('tip', 2),
-                                                 isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                                 collection=collection);
-                                elif element[keyData].get('tip') is 2:
-                                    Obje_Olsutur(kalinlik=element[keyData]['malzeme'].get('kalınlık', 1.8),
-                                                 derinlik=element[keyData].get('boy', 0),
-                                                 yukseklik=element[keyData].get('en'),
-                                                 modul_genislik=element[keyData].get('boy', 0),
-                                                 locationX=element[keyData].get('x_1', 50),
-                                                 locationY=element[keyData].get('y_1', 0),
-                                                 locationZ=element[keyData].get('z_1', 0),
-                                                 yon=element[keyData].get('tip', 2),
-                                                 isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                                 collection=collection);
+                            if element[keyData].get('dahil', False) == True:
+                                # Kapak  çizim
+                                if 'kapak' in keyData:
+                                    Obje_Olsutur(kalinlik=element[keyData].get('malzeme', {"mn": 0,
+                                                                                           "kn": 0,
+                                                                                           "adı": "66_Kar Beyaz",
+                                                                                           "kalınlık": 1.8,
+                                                                                           "image": "rgb(255,255,255)"}).get(
+                                        'kalınlık', 1.8),
+                                        derinlik=element[keyData].get('en', 0),
+                                        yukseklik=element[keyData].get('boy'),
+                                        modul_genislik=element[keyData].get('en', 0),
+                                        locationX=element[keyData].get('x_1', 50),
+                                        locationY=element[keyData].get('y_1', 0),
+                                        locationZ=element[keyData].get('z_1', 0),
+                                        yon=element[keyData].get('tip', 2),
+                                        isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
+                                        collection=collection);
+                                elif element[keyData].get('tip', 2) == 1:
+                                    Obje_Olsutur(kalinlik=element[keyData].get('malzeme', {"mn": 0,
+                                                                                           "kn": 0,
+                                                                                           "adı": "66_Kar Beyaz",
+                                                                                           "kalınlık": 1.8,
+                                                                                           "image": "rgb(255,255,255)"}).get(
+                                        'kalınlık', 1.8),
+                                        derinlik=element[keyData].get('en', 0),
+                                        yukseklik=element[keyData].get('en'),
+                                        modul_genislik=element[keyData].get('boy', 0),
+                                        locationX=element[keyData].get('x_1', 50),
+                                        locationY=element[keyData].get('y_1', 0),
+                                        locationZ=element[keyData].get('z_1', 0),
+                                        yon=element[keyData].get('tip', 2),
+                                        isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
+                                        collection=collection);
+                                elif element[keyData].get('tip', 2) == 2:
+                                    Obje_Olsutur(kalinlik=element[keyData].get('malzeme', {"mn": 0,
+                                                                                           "kn": 0,
+                                                                                           "adı": "66_Kar Beyaz",
+                                                                                           "kalınlık": 1.8,
+                                                                                           "image": "rgb(255,255,255)"}).get(
+                                        'kalınlık', 1.8),
+                                        derinlik=element[keyData].get('boy', 0),
+                                        yukseklik=element[keyData].get('en'),
+                                        modul_genislik=element[keyData].get('boy', 0),
+                                        locationX=element[keyData].get('x_1', 50),
+                                        locationY=element[keyData].get('y_1', 0),
+                                        locationZ=element[keyData].get('z_1', 0),
+                                        yon=element[keyData].get('tip', 2),
+                                        isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
+                                        collection=collection);
                                 else:
-                                    Obje_Olsutur(kalinlik=element[keyData]['malzeme'].get('kalınlık', 1.8),
-                                                 derinlik=element[keyData].get('en', 0),
-                                                 yukseklik=element[keyData].get('boy'),
-                                                 modul_genislik=element[keyData].get('en', 0),
-                                                 locationX=element[keyData].get('x_1', 50),
-                                                 locationY=element[keyData].get('y_1', 0),
-                                                 locationZ=element[keyData].get('z_1', 0),
-                                                 yon=element[keyData].get('tip', 2),
-                                                 isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                                 collection=collection);
+                                    Obje_Olsutur(kalinlik=element[keyData].get('maleme', {"mn": 0,
+                                                                                          "kn": 0,
+                                                                                          "adı": "66_Kar Beyaz",
+                                                                                          "kalınlık": 1.8,
+                                                                                          "image": "rgb(255,255,255)"}).get(
+                                        'kalınlık', 1.8),
+                                        derinlik=element[keyData].get('en', 0),
+                                        yukseklik=element[keyData].get('boy'),
+                                        modul_genislik=element[keyData].get('en', 0),
+                                        locationX=element[keyData].get('x_1', 50),
+                                        locationY=element[keyData].get('y_1', 0),
+                                        locationZ=element[keyData].get('z_1', 0),
+                                        yon=element[keyData].get('tip', 2),
+                                        isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
+                                        collection=collection);
 
 
 if __name__ == '__main__':
-    """ kutu_Olustur(DataCollection.data, DataCollection.data['modül_adı']);
-     collection_move(DataCollection.data['x1'], DataCollection.data['y1'], DataCollection.data['z1'],
-                     DataCollection.data['modül_adı']);
- 
-     kutu_Olustur(DataCollection.altData, DataCollection.altData['modül_adı']);
-     collection_move(DataCollection.altData['x1'], DataCollection.altData['y1'], DataCollection.altData['z1'],
-                     DataCollection.altData['modül_adı']);"""
-
     databaseItem = DatabaseConnection.Collection();
-    databaseItem.getDataFromDatabase()
+    databaseItem.getDataFromDatabase();
+    mod_isim = [];
+    count = 0;
 
     for element in databaseItem.databaseItems:
-        kutu_Olustur(element, element['modül_adı']);
-        collection_move(element['x1'], element['y_1'], element['z_1'], element['modül_adı']);
+        mod_isim.append(element['modül_adı']);
+        ad = element['modül_adı'];
 
-""" kutu_Olustur(DataCollection.boy_dolap, DataCollection.boy_dolap['modül_adı']);
- collection_move(DataCollection.boy_dolap['x1'], DataCollection.boy_dolap['y1'],
-                 DataCollection.boy_dolap['z1'],
-                 DataCollection.boy_dolap['modül_adı']);
+        for isim in mod_isim:
+            if ad == isim:
+                ad = str(element['modül_adı']) + '_' + str(count);
+                count = count + 1;
 
- kutu_Olustur(DataCollection.cekmeceli_dolap_1, DataCollection.cekmeceli_dolap_1['modül_adı']);
- collection_move(DataCollection.cekmeceli_dolap_1['x1'], DataCollection.cekmeceli_dolap_1['y1'],
-                 DataCollection.cekmeceli_dolap_1['z1'],
-                 DataCollection.cekmeceli_dolap_1['modül_adı']);
+        kutu_Olustur(element, ad);
+        collection_move(element['x1'], element['y1'],
+                        element['z1'],
+                        ad);
 
- kutu_Olustur(DataCollection.cekmeceli_dolap_2, DataCollection.cekmeceli_dolap_2['modül_adı']);
- collection_move(DataCollection.cekmeceli_dolap_2['x1'], DataCollection.cekmeceli_dolap_2['y1'],
-                 DataCollection.cekmeceli_dolap_2['z1'],
-                 DataCollection.cekmeceli_dolap_2['modül_adı']);
-"""
+    bpy.ops.object.camera_add(enter_editmode=False, align='VIEW',
+                              location=(-725.729736328125, 42.93286895751953, -35.50117492675781));
+
+    """ kutu_Olustur(DataCollection.boy_dolap, DataCollection.boy_dolap['modül_adı']);
+     collection_move(DataCollection.boy_dolap['x1'], DataCollection.boy_dolap['y1'],
+                     DataCollection.boy_dolap['z1'],
+                     DataCollection.boy_dolap['modül_adı']);
+    
+     kutu_Olustur(DataCollection.cekmeceli_dolap_1, DataCollection.cekmeceli_dolap_1['modül_adı']);
+     collection_move(DataCollection.cekmeceli_dolap_1['x1'], DataCollection.cekmeceli_dolap_1['y1'],
+                     DataCollection.cekmeceli_dolap_1['z1'],
+                     DataCollection.cekmeceli_dolap_1['modül_adı']);
+    
+     kutu_Olustur(DataCollection.cekmeceli_dolap_2, DataCollection.cekmeceli_dolap_2['modül_adı']);
+     collection_move(DataCollection.cekmeceli_dolap_2['x1'], DataCollection.cekmeceli_dolap_2['y1'],
+                     DataCollection.cekmeceli_dolap_2['z1'],
+                     DataCollection.cekmeceli_dolap_2['modül_adı']);
+    """
