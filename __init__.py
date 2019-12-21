@@ -1,6 +1,7 @@
 import bpy
 import mathutils
 import DataCollection
+import DatabaseConnection
 
 standard_kalinlik = 0.018;
 standard_derinlik = 0.60;
@@ -198,17 +199,25 @@ if __name__ == '__main__':
      collection_move(DataCollection.altData['x1'], DataCollection.altData['y1'], DataCollection.altData['z1'],
                      DataCollection.altData['modül_adı']);"""
 
-    kutu_Olustur(DataCollection.boy_dolap, DataCollection.boy_dolap['modül_adı']);
-    collection_move(DataCollection.boy_dolap['x1'], DataCollection.boy_dolap['y1'],
-                    DataCollection.boy_dolap['z1'],
-                    DataCollection.boy_dolap['modül_adı']);
+    databaseItem = DatabaseConnection.Collection();
+    databaseItem.getDataFromDatabase()
 
-    kutu_Olustur(DataCollection.cekmeceli_dolap_1, DataCollection.cekmeceli_dolap_1['modül_adı']);
-    collection_move(DataCollection.cekmeceli_dolap_1['x1'], DataCollection.cekmeceli_dolap_1['y1'],
-                    DataCollection.cekmeceli_dolap_1['z1'],
-                    DataCollection.cekmeceli_dolap_1['modül_adı']);
+    for element in databaseItem.databaseItems:
+        kutu_Olustur(element, element['modül_adı']);
+        collection_move(element['x1'], element['y_1'], element['z_1'], element['modül_adı']);
 
-    kutu_Olustur(DataCollection.cekmeceli_dolap_2, DataCollection.cekmeceli_dolap_2['modül_adı']);
-    collection_move(DataCollection.cekmeceli_dolap_2['x1'], DataCollection.cekmeceli_dolap_2['y1'],
-                    DataCollection.cekmeceli_dolap_2['z1'],
-                    DataCollection.cekmeceli_dolap_2['modül_adı']);
+""" kutu_Olustur(DataCollection.boy_dolap, DataCollection.boy_dolap['modül_adı']);
+ collection_move(DataCollection.boy_dolap['x1'], DataCollection.boy_dolap['y1'],
+                 DataCollection.boy_dolap['z1'],
+                 DataCollection.boy_dolap['modül_adı']);
+
+ kutu_Olustur(DataCollection.cekmeceli_dolap_1, DataCollection.cekmeceli_dolap_1['modül_adı']);
+ collection_move(DataCollection.cekmeceli_dolap_1['x1'], DataCollection.cekmeceli_dolap_1['y1'],
+                 DataCollection.cekmeceli_dolap_1['z1'],
+                 DataCollection.cekmeceli_dolap_1['modül_adı']);
+
+ kutu_Olustur(DataCollection.cekmeceli_dolap_2, DataCollection.cekmeceli_dolap_2['modül_adı']);
+ collection_move(DataCollection.cekmeceli_dolap_2['x1'], DataCollection.cekmeceli_dolap_2['y1'],
+                 DataCollection.cekmeceli_dolap_2['z1'],
+                 DataCollection.cekmeceli_dolap_2['modül_adı']);
+"""
