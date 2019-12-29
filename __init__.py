@@ -1,6 +1,12 @@
 import bpy
 import mathutils
 import DatabaseConnection
+from bpy.app.handlers import persistent
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 
 standard_kalinlik = 0.018;
 standard_derinlik = 0.60;
@@ -70,7 +76,7 @@ def collection_move(x, y, z, collection_adı):
 
     for obj in objects_sahne:
         old_locationX, old_locationY, old_locationZ = obj.location;
-        obj.location = (int(old_locationX - z), int(old_locationY - x), int(old_locationZ - y));
+        obj.location = (float(old_locationX - z), float(old_locationY - x), float(old_locationZ - y));
 
 
 def createNewCollection(CollectionName='Yusuf'):
@@ -239,13 +245,27 @@ def kameraOlustur():
 def renderAl(customerEmail, id):
     scene = bpy.context.scene;
     scene.render.image_settings.file_format = 'PNG';
-    scene.render.filepath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
-    data = bpy.ops.render.render('INVOKE_DEFAULT', write_still=True);
-    print(data);
+    global ImgFilePath
+
+    ImgFilePath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
+
+    scene.render.filepath = ImgFilePath
+    bpy.ops.render.render('INVOKE_DEFAULT', write_still=True);
+    return ImgFilePath
 
 
 def assignMaterial(textureAdı='test', obj=bpy.context.active_object):
     obj.data.materials.append(bpy.data.materials[textureAdı]);
+
+
+@persistent
+def SendEmailToCustomer(dummy):
+    print('Path : ' + ImgFilePath)
+
+    emailGonder = Send(To=CustomerEmail,
+                       ImgFolder=ImgFilePath,
+                       name='MobilyaPlan_' + CustomerName)
+    emailGonder.sendEmail();
 
 
 if __name__ == '__main__':
@@ -253,6 +273,15 @@ if __name__ == '__main__':
     databaseItem.getDataFromDatabase();
     mod_isim = [];
     count = 0;
+
+    global CustomerEmail
+    global CustomerName
+
+    CustomerEmail = databaseItem.customerProperty[0].get('musteriEmail', 'sarginlar@gmail.com')
+    CustomerName = databaseItem.customerProperty[0].get('musteriAdi', 'MobilyaPlan')
+
+    print('CustomerName: ' + CustomerName)
+    print('CustomerEmail: ' + CustomerEmail)
 
     for element in databaseItem.databaseItems:
         mod_isim.append(element['modül_adı']);
@@ -269,4 +298,34 @@ if __name__ == '__main__':
                         ad);
 
     kameraOlustur();
-    renderAl('yusufsargin9@gmail.com', '123');
+    renderAl(CustomerEmail, '123')
+    # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
+    bpy.app.handlers.render_post.append(SendEmailToCustomer)
+
+
+class Send:
+    def __init__(self, To, ImgFolder, name):
+        self.To = To
+        self.ImgFolder = ImgFolder
+        self.From = 'yusufsargin9@gmail.com'
+        self.Name = name
+
+    def sendEmail(self):
+        print('ELEMENT ' + self.To, self.ImgFolder, self.Name)
+
+        img_data = open(self.ImgFolder, 'rb').read()
+        msg = MIMEMultipart()
+        msg['Subject'] = 'Teşekkür Ederiz.'
+        msg['From'] = self.To
+        msg['To'] = self.From
+
+        text = MIMEText("Teşekkür Ederiz.")
+        msg.attach(text)
+        image = MIMEImage(img_data, name=self.Name)
+        msg.attach(image)
+
+        s = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        s.ehlo()
+        s.login('yusufsargin9@gmail.com', 'sargin_966')
+        s.sendmail(self.From, self.To, msg.as_string())
+        s.quit()

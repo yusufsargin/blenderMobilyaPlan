@@ -4,7 +4,8 @@ import requests
 
 class Collection:
     def __init__(self):
-        self.databaseItems = [];
+        self.databaseItems = []
+        self.customerProperty = []
         self.filter = 'renderItem'
 
     def getDataFromDatabase(self):
@@ -12,6 +13,12 @@ class Collection:
 
         if self.filter == 'renderItem':
             for item in data:
+                self.customerProperty.append({
+                    'musteriAdi': item['data'].get('musteriAdi'),
+                    'musteriEmail': item['data'].get('musteriEmail'),
+                    'time': int(item.get('data').get('time'))
+                })
+
                 for element in item['data']['cizim']:
                     self.databaseItems.append(element);
         else:
@@ -19,6 +26,8 @@ class Collection:
                 if element['render'] == False:
                     for item in element['data']['cizim']:
                         self.databaseItems.append(item);
+
+        print(self.customerProperty)
 
     def printElement(self):
         print(self.databaseItems);
