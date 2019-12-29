@@ -1,5 +1,5 @@
 import bpy
-
+import mathutils
 import DatabaseConnection
 
 standard_kalinlik = 0.018;
@@ -30,11 +30,12 @@ def make_offset(obj, yon=1, ust=0, yan=0):
 
 def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yukseklik=standard_yukseklik,
                  modul_genislik=0, locationX=0, locationY=0, locationZ=0, isim='Sargın',
-                 collection=bpy.data.collections[0],
-                 yon=1):
+                 collection=[],
+                 yon=1, texture='test'):
     bpy.ops.mesh.primitive_cube_add(size=2);
     obj = bpy.context.active_object;
     obj.name = str(isim + '_' + str(yon));
+    assignMaterial('wood', obj);
 
     if yon is 2:  # sağ_yan
         obj.dimensions = (derinlik, kalinlik, yukseklik);
@@ -220,6 +221,33 @@ def kutu_Olustur(DataCollectionJson, CollectionName='Yusuf'):
                                         collection=collection);
 
 
+def kameraOlustur():
+    bpy.ops.object.camera_add(enter_editmode=False, location=mathutils.Vector((-600.0, -180.0, -160.0)));
+    bpy.ops.transform.rotate(value=-1.5708, orient_axis='Z', orient_type='GLOBAL',
+                             orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
+                             constraint_axis=(False, False, True), mirror=True, use_proportional_edit=False,
+                             proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False,
+                             use_proportional_projected=False);
+    bpy.ops.transform.rotate(value=-1.5708, orient_axis='Y', orient_type='GLOBAL',
+                             orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
+                             constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False,
+                             proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False,
+                             use_proportional_projected=False);
+    bpy.context.object.data.sensor_width = 50;
+
+
+def renderAl(customerEmail, id):
+    scene = bpy.context.scene;
+    scene.render.image_settings.file_format = 'PNG';
+    scene.render.filepath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
+    data = bpy.ops.render.render('INVOKE_DEFAULT', write_still=True);
+    print(data);
+
+
+def assignMaterial(textureAdı='test', obj=bpy.context.active_object):
+    obj.data.materials.append(bpy.data.materials[textureAdı]);
+
+
 if __name__ == '__main__':
     databaseItem = DatabaseConnection.Collection();
     databaseItem.getDataFromDatabase();
@@ -234,27 +262,11 @@ if __name__ == '__main__':
             if ad == isim:
                 ad = str(element['modül_adı']) + '_' + str(count);
                 count = count + 1;
-
+        print(ad);
         kutu_Olustur(element, ad);
         collection_move(element['x1'], element['y1'],
                         element['z1'],
                         ad);
 
-    bpy.ops.object.camera_add(enter_editmode=False, align='VIEW',
-                              location=(-725.729736328125, 42.93286895751953, -35.50117492675781));
-
-    """ kutu_Olustur(DataCollection.boy_dolap, DataCollection.boy_dolap['modül_adı']);
-     collection_move(DataCollection.boy_dolap['x1'], DataCollection.boy_dolap['y1'],
-                     DataCollection.boy_dolap['z1'],
-                     DataCollection.boy_dolap['modül_adı']);
-    
-     kutu_Olustur(DataCollection.cekmeceli_dolap_1, DataCollection.cekmeceli_dolap_1['modül_adı']);
-     collection_move(DataCollection.cekmeceli_dolap_1['x1'], DataCollection.cekmeceli_dolap_1['y1'],
-                     DataCollection.cekmeceli_dolap_1['z1'],
-                     DataCollection.cekmeceli_dolap_1['modül_adı']);
-    
-     kutu_Olustur(DataCollection.cekmeceli_dolap_2, DataCollection.cekmeceli_dolap_2['modül_adı']);
-     collection_move(DataCollection.cekmeceli_dolap_2['x1'], DataCollection.cekmeceli_dolap_2['y1'],
-                     DataCollection.cekmeceli_dolap_2['z1'],
-                     DataCollection.cekmeceli_dolap_2['modül_adı']);
-    """
+    kameraOlustur();
+    renderAl('yusufsargin9@gmail.com', '123');
