@@ -15,16 +15,18 @@ class Collection:
 
         if self.filter == 'renderItem':
             for item in data:
-                for element in item['data']['cizim']:
-                    self.databaseItems.append(element);
+                if item['data'].get('rendered'):
+                    self.databaseItems = []
+                    for element in item['data']['cizim']:
+                        self.databaseItems.append(element);
 
-                self.customerProperty.append({
-                    'databaseId': item['data'].get('wixId'),
-                    'musteriAdi': item['data'].get('musteriAdi'),
-                    'musteriEmail': item['data'].get('musteriEmail'),
-                    'time': int(item.get('data').get('time')),
-                    'databaseItems': self.databaseItems
-                });
+                    self.customerProperty.append({
+                        'databaseId': item['data'].get('wixId'),
+                        'musteriAdi': item['data'].get('musteriAdi'),
+                        'musteriEmail': item['data'].get('musteriEmail'),
+                        'time': int(item.get('data').get('time')),
+                        'databaseItems': self.databaseItems
+                    });
 
         if len(self.customerProperty) > 1:
             for i in range(1, len(self.customerProperty)):
@@ -32,17 +34,19 @@ class Collection:
                     self.shortedData.append(self.customerProperty[i - 1])
                 else:
                     self.shortedData.append(self.customerProperty[i])
-        else:
-            self.shortedData.append(self.customerProperty)
+        elif len(self.customerProperty) != 0:
+            self.shortedData.append(self.customerProperty[0])
+
+        return len(self.shortedData) == 0
 
     def printElement(self):
         print(self.databaseItems);
         print('\n');
 
-    def changeRenderStatus(id):
-        requests.post('https://sarginapi.herokuapp.com/renders/update' + id, {'renderedStatus': False})
+    def changeRenderStatus(self, id):
+        requests.post('https://sarginapi.herokuapp.com/renders/update/' + id, {'renderedStatus': False})
 
 
 if __name__ == '__main__':
     element = Collection();
-    element.getDataFromDatabase();
+    element.getDataFromDatabase()

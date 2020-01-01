@@ -2,6 +2,7 @@ import bpy
 import mathutils
 import DatabaseConnection
 from bpy.app.handlers import persistent
+import time
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -267,43 +268,67 @@ def SendEmailToCustomer(dummy):
                        name='MobilyaPlan_' + CustomerName)
     emailGonder.sendEmail();
     databaseItem.changeRenderStatus(CustomerId)
+    deleteAllObject()
+    sarginCizimCalistir()
 
 
-if __name__ == '__main__':
+def deleteAllObject():
+    # clear collection
+    for c in bpy.data.collections:
+        bpy.data.collections.remove(c)
+
+    for o in bpy.context.scene.objects:
+        if o.type != 'LIGHT':
+            o.select_set(True)
+
+    bpy.data.objects['Camera'].select_set(True)
+
+    bpy.ops.object.delete();
+
+
+
+def sarginCizimCalistir():
+    global databaseItem
     databaseItem = DatabaseConnection.Collection();
-    databaseItem.getDataFromDatabase();
+    isEmpty = databaseItem.getDataFromDatabase();
     mod_isim = [];
     count = 0;
 
-    global CustomerEmail
-    global CustomerName
-    global CustomerId
+    if not isEmpty:
+        global CustomerEmail
+        global CustomerName
+        global CustomerId
 
-    CustomerId = databaseItem.customerProperty[0].get('databaseId')
-    CustomerEmail = databaseItem.customerProperty[0].get('musteriEmail', 'sarginlar@gmail.com')
-    CustomerName = databaseItem.customerProperty[0].get('musteriAdi', 'MobilyaPlan')
+        CustomerId = databaseItem.shortedData[0].get('databaseId')
+        print(CustomerId)
+        CustomerEmail = databaseItem.shortedData[0].get('musteriEmail', 'sarginlar@gmail.com')
+        CustomerName = databaseItem.shortedData[0].get('musteriAdi', 'MobilyaPlan')
 
-    print('CustomerName: ' + CustomerName)
-    print('CustomerEmail: ' + CustomerEmail)
+        print('CustomerName: ' + CustomerName)
+        print('CustomerEmail: ' + CustomerEmail)
 
-    for element in databaseItem.shortedData[0].get('databaseItems'):
-        mod_isim.append(element['modül_adı']);
-        ad = element['modül_adı'];
+        for element in databaseItem.shortedData[0].get('databaseItems'):
+            mod_isim.append(element['modül_adı']);
+            ad = element['modül_adı'];
 
-        for isim in mod_isim:
-            if ad == isim:
-                ad = str(element['modül_adı']) + '_' + str(count);
-                count = count + 1;
-        print(ad);
-        kutu_Olustur(element, ad);
-        collection_move(element.get('x1'), element.get('y1'),
-                        element.get('z1'),
-                        ad);
+            for isim in mod_isim:
+                if ad == isim:
+                    ad = str(element['modül_adı']) + '_' + str(count);
+                    count = count + 1;
+            print(ad);
+            kutu_Olustur(element, ad);
+            collection_move(element.get('x1'), element.get('y1'),
+                            element.get('z1'),
+                            ad);
 
-    kameraOlustur();
-    renderAl(CustomerEmail, '123')
-    # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-    bpy.app.handlers.render_post.append(SendEmailToCustomer)
+        kameraOlustur();
+        renderAl(CustomerEmail, '123')
+        # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
+        bpy.app.handlers.render_post.append(SendEmailToCustomer)
+
+
+if __name__ == '__main__':
+    sarginCizimCalistir();
 
 
 class Send:
