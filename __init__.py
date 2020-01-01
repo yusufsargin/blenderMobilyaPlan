@@ -8,6 +8,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
+import threading
+from functools import wraps
 
 standard_kalinlik = 0.018;
 standard_derinlik = 0.60;
@@ -15,6 +17,42 @@ standard_yukseklik = 0.75;
 standard_genislik = 0.65;
 obj_sayı = 1;
 sahnedeki_objeler = [];
+
+
+def delay(delay=0.):
+    """
+    Decorator delaying the execution of a function for a while.
+    """
+
+    def wrap(f):
+        @wraps(f)
+        def delayed(*args, **kwargs):
+            timer = threading.Timer(delay, f, args=args, kwargs=kwargs)
+            timer.start()
+
+        return delayed
+
+    return wrap
+
+
+class Timer():
+    toClearTimer = False
+
+    def setTimeout(self, fn, time):
+        isInvokationCancelled = False
+
+        @delay(time)
+        def some_fn():
+            if (self.toClearTimer is False):
+                fn()
+            else:
+                print('Invokation is cleared!')
+
+        some_fn()
+        return isInvokationCancelled
+
+    def setClearTimer(self):
+        self.toClearTimer = True
 
 
 def make_offset(obj, yon=1, ust=0, yan=0):
@@ -269,8 +307,10 @@ def SendEmailToCustomer(dummy):
     emailGonder.sendEmail();
     databaseItem.changeRenderStatus(CustomerId)
     deleteAllObject()
-    sarginCizimCalistir()
 
+@persistent
+def triggerAgain(dummy):
+    sarginCizimCalistir()
 
 def deleteAllObject():
     # clear collection
@@ -285,6 +325,8 @@ def deleteAllObject():
 
     bpy.ops.object.delete();
 
+    timer = Timer()
+    timer.setTimeout(sarginCizimCalistir(), 5.0)
 
 
 def sarginCizimCalistir():
@@ -325,10 +367,11 @@ def sarginCizimCalistir():
         renderAl(CustomerEmail, '123')
         # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
         bpy.app.handlers.render_post.append(SendEmailToCustomer)
+        bpy.app.handlers.render_post.append(triggerAgain)
 
 
 if __name__ == '__main__':
-    sarginCizimCalistir();
+    sarginCizimCalistir()
 
 
 class Send:
