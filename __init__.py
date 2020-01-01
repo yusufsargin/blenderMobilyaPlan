@@ -77,7 +77,7 @@ def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yuksekl
                  modul_genislik=0, locationX=0, locationY=0, locationZ=0, isim='Sargın',
                  collection=[],
                  yon=1, texture='test'):
-    bpy.ops.mesh.primitive_cube_add(size=2);
+    bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False);
     obj = bpy.context.active_object;
     obj.name = str(isim + '_' + str(yon));
     assignMaterial('wood', obj);
@@ -308,25 +308,23 @@ def SendEmailToCustomer(dummy):
     databaseItem.changeRenderStatus(CustomerId)
     deleteAllObject()
 
+
 @persistent
 def triggerAgain(dummy):
     sarginCizimCalistir()
 
+
 def deleteAllObject():
     # clear collection
     for c in bpy.data.collections:
-        bpy.data.collections.remove(c)
+        bpy.data.collections.remove(c, do_unlink=True)
 
-    for o in bpy.context.scene.objects:
-        if o.type != 'LIGHT':
-            o.select_set(True)
+    for o in bpy.data.objects:
+        bpy.data.objects.remove(o, do_unlink=True)
 
-    bpy.data.objects['Camera'].select_set(True)
+    bpy.ops.object.select_all(action='SELECT')
 
     bpy.ops.object.delete();
-
-    timer = Timer()
-    timer.setTimeout(sarginCizimCalistir(), 5.0)
 
 
 def sarginCizimCalistir():
@@ -357,7 +355,7 @@ def sarginCizimCalistir():
                 if ad == isim:
                     ad = str(element['modül_adı']) + '_' + str(count);
                     count = count + 1;
-            print(ad);
+
             kutu_Olustur(element, ad);
             collection_move(element.get('x1'), element.get('y1'),
                             element.get('z1'),
@@ -366,6 +364,7 @@ def sarginCizimCalistir():
         kameraOlustur();
         renderAl(CustomerEmail, '123')
         # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
+        bpy.app.handlers.render_post.clear()
         bpy.app.handlers.render_post.append(SendEmailToCustomer)
         bpy.app.handlers.render_post.append(triggerAgain)
 
