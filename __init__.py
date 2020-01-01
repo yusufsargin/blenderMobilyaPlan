@@ -266,6 +266,7 @@ def SendEmailToCustomer(dummy):
                        ImgFolder=ImgFilePath,
                        name='MobilyaPlan_' + CustomerName)
     emailGonder.sendEmail();
+    databaseItem.changeRenderStatus(CustomerId)
 
 
 if __name__ == '__main__':
@@ -276,7 +277,9 @@ if __name__ == '__main__':
 
     global CustomerEmail
     global CustomerName
+    global CustomerId
 
+    CustomerId = databaseItem.customerProperty[0].get('databaseId')
     CustomerEmail = databaseItem.customerProperty[0].get('musteriEmail', 'sarginlar@gmail.com')
     CustomerName = databaseItem.customerProperty[0].get('musteriAdi', 'MobilyaPlan')
 

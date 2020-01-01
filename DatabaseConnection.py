@@ -19,6 +19,7 @@ class Collection:
                     self.databaseItems.append(element);
 
                 self.customerProperty.append({
+                    'databaseId': item['data'].get('wixId'),
                     'musteriAdi': item['data'].get('musteriAdi'),
                     'musteriEmail': item['data'].get('musteriEmail'),
                     'time': int(item.get('data').get('time')),
@@ -37,6 +38,9 @@ class Collection:
     def printElement(self):
         print(self.databaseItems);
         print('\n');
+
+    def changeRenderStatus(id):
+        requests.post('https://sarginapi.herokuapp.com/renders/update' + id, {'renderedStatus': False})
 
 
 if __name__ == '__main__':
