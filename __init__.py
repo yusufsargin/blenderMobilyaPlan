@@ -15,12 +15,17 @@ standard_kalinlik = 0.018;
 standard_derinlik = 0.60;
 standard_yukseklik = 0.75;
 standard_genislik = 0.65;
-obj_sayı = 1;
 sahnedeki_objeler = [];
+
+global CustomerEmail
+global CustomerName
+global CustomerId
+global databaseItem
 
 
 def delay(delay=0.):
     """
+    Decorator delaying the execution of a function for a while.
     Decorator delaying the execution of a function for a while.
     """
 
@@ -78,7 +83,9 @@ def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yuksekl
                  collection=[],
                  yon=1, texture='test'):
     bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False);
-    obj = bpy.context.active_object;
+    obj = bpy.context.scene.objects["Cube"]  # Get the object
+    bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
+    bpy.context.view_layer.objects.active = obj
     obj.name = str(isim + '_' + str(yon));
     assignMaterial('wood', obj);
 
@@ -110,8 +117,8 @@ def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yuksekl
     return obj
 
 
-def collection_move(x, y, z, collection_adı):
-    objects_sahne = bpy.data.collections[collection_adı].objects;
+def collection_move(x, y, z, collection_adi):
+    objects_sahne = bpy.data.collections[collection_adi].objects;
 
     for obj in objects_sahne:
         old_locationX, old_locationY, old_locationZ = obj.location;
@@ -289,12 +296,12 @@ def renderAl(customerEmail, id):
     ImgFilePath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
 
     scene.render.filepath = ImgFilePath
-    bpy.ops.render.render('INVOKE_DEFAULT', write_still=True);
+    bpy.ops.render.render('INVOKE_DEFAULT', write_still=False, animation=False);
     return ImgFilePath
 
 
-def assignMaterial(textureAdı='test', obj=bpy.context.active_object):
-    obj.data.materials.append(bpy.data.materials[textureAdı]);
+def assignMaterial(textureAdi='test', obj=bpy.context.active_object):
+    obj.data.materials.append(bpy.data.materials[textureAdi]);
 
 
 @persistent
@@ -306,12 +313,18 @@ def SendEmailToCustomer(dummy):
                        name='MobilyaPlan_' + CustomerName)
     emailGonder.sendEmail();
     databaseItem.changeRenderStatus(CustomerId)
+
     deleteAllObject()
 
 
+def createNewScene():
+    new_scene = bpy.data.scenes.new(name='DENEME')
+    bpy.context.window.scene = new_scene
+
+
 @persistent
-def triggerAgain(dummy):
-    sarginCizimCalistir()
+def trigger(dummy):
+    createNewScene()
 
 
 def deleteAllObject():
@@ -322,23 +335,14 @@ def deleteAllObject():
     for o in bpy.data.objects:
         bpy.data.objects.remove(o, do_unlink=True)
 
-    bpy.ops.object.select_all(action='SELECT')
-
-    bpy.ops.object.delete();
-
 
 def sarginCizimCalistir():
-    global databaseItem
     databaseItem = DatabaseConnection.Collection();
     isEmpty = databaseItem.getDataFromDatabase();
     mod_isim = [];
     count = 0;
 
     if not isEmpty:
-        global CustomerEmail
-        global CustomerName
-        global CustomerId
-
         CustomerId = databaseItem.shortedData[0].get('databaseId')
         print(CustomerId)
         CustomerEmail = databaseItem.shortedData[0].get('musteriEmail', 'sarginlar@gmail.com')
@@ -348,12 +352,12 @@ def sarginCizimCalistir():
         print('CustomerEmail: ' + CustomerEmail)
 
         for element in databaseItem.shortedData[0].get('databaseItems'):
-            mod_isim.append(element['modül_adı']);
+            mod_isim.append(element.get('modül_adı'))
             ad = element['modül_adı'];
 
             for isim in mod_isim:
                 if ad == isim:
-                    ad = str(element['modül_adı']) + '_' + str(count);
+                    ad = str(element.get('modül_adı')) + '_' + str(count);
                     count = count + 1;
 
             kutu_Olustur(element, ad);
@@ -361,21 +365,25 @@ def sarginCizimCalistir():
                             element.get('z1'),
                             ad);
 
-        kameraOlustur();
-        renderAl(CustomerEmail, '123')
+        # kameraOlustur();
+        renderAl('sarginlar@gmail.com', '123')
         # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
         bpy.app.handlers.render_post.clear()
         bpy.app.handlers.render_post.append(SendEmailToCustomer)
-        bpy.app.handlers.render_post.append(triggerAgain)
+
+
+def in_10_seconds():
+    sarginCizimCalistir()
 
 
 if __name__ == '__main__':
     sarginCizimCalistir()
+    bpy.app.timers.register(in_10_seconds, first_interval=35)
 
 
 class Send:
     def __init__(self, To, ImgFolder, name):
-        self.To = To
+        self.To = 'sarginlar@gmail.com'
         self.ImgFolder = ImgFolder
         self.From = 'yusufsargin9@gmail.com'
         self.Name = name
