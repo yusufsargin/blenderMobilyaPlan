@@ -10,6 +10,8 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 import threading
 from functools import wraps
+import mathutils
+import math
 
 standard_kalinlik = 0.018;
 standard_derinlik = 0.60;
@@ -112,7 +114,6 @@ def Obje_Olsutur(kalinlik=standard_kalinlik, derinlik=standard_derinlik, yuksekl
             obj.location = ((x - locationZ), (y - locationX), (z - locationY));
 
     sahnedeki_objeler.append(obj);
-    bpy.ops.collection.objects_remove_all();
     collection.objects.link(obj);
     return obj
 
@@ -274,21 +275,32 @@ def kutu_Olustur(DataCollectionJson, CollectionName='Yusuf'):
 
 
 def kameraOlustur():
+    print('MODE ' + bpy.context.mode)
     bpy.ops.object.camera_add(enter_editmode=False, location=mathutils.Vector((-600.0, -180.0, -160.0)));
-    bpy.ops.transform.rotate(value=-1.5708, orient_axis='Z', orient_type='GLOBAL',
-                             orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
-                             constraint_axis=(False, False, True), mirror=True, use_proportional_edit=False,
-                             proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False,
-                             use_proportional_projected=False);
-    bpy.ops.transform.rotate(value=-1.5708, orient_axis='Y', orient_type='GLOBAL',
-                             orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
-                             constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False,
-                             proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False,
-                             use_proportional_projected=False);
-    bpy.context.object.data.sensor_width = 50;
+    bpy.context.view_layer.objects.active = bpy.data.objects['Camera']
+    bpy.data.objects['Camera'].rotation_euler = mathutils.Euler(
+        (math.radians(-90.0), math.radians(-180.0), math.radians(90.0)), 'XYZ')
+
+    bpy.data.objects['Camera'].data.sensor_width = 50;
 
 
 def renderAl(customerEmail, id):
+    idx = bpy.context.window_manager.windows[:].index(bpy.context.window)
+    window = bpy.context.window_manager.windows[idx]
+    screen = window.screen
+    views_3d = sorted(
+        [a for a in screen.areas if a.type == 'VIEW_3D'],
+        key=lambda a: (a.width * a.height))
+    if views_3d:
+        a = views_3d[0]
+        # override
+        o = {"window": window,
+             "screen": screen,
+             "area": a,
+             "space_data": a.spaces.active,
+             "region": a.regions[-1]
+             }
+
     scene = bpy.context.scene;
     scene.render.image_settings.file_format = 'PNG';
     global ImgFilePath
@@ -296,7 +308,7 @@ def renderAl(customerEmail, id):
     ImgFilePath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
 
     scene.render.filepath = ImgFilePath
-    bpy.ops.render.render('INVOKE_DEFAULT', write_still=False, animation=False);
+    bpy.ops.render.render(o, 'INVOKE_DEFAULT', write_still=False, animation=False);
     return ImgFilePath
 
 
@@ -308,13 +320,11 @@ def assignMaterial(textureAdi='test', obj=bpy.context.active_object):
 def SendEmailToCustomer(dummy):
     print('Path : ' + ImgFilePath)
 
-    emailGonder = Send(To=CustomerEmail,
+    emailGonder = Send(To='sarginlar@gmail.com',
                        ImgFolder=ImgFilePath,
-                       name='MobilyaPlan_' + CustomerName)
+                       name='MobilyaPlan_' + 'CustomerName')
     emailGonder.sendEmail();
     databaseItem.changeRenderStatus(CustomerId)
-
-    deleteAllObject()
 
 
 def createNewScene():
@@ -328,11 +338,13 @@ def trigger(dummy):
 
 
 def deleteAllObject():
+    collections = list(bpy.data.collections)
+    objects = list(bpy.context.view_layer.objects)
     # clear collection
-    for c in bpy.data.collections:
+    for c in collections:
         bpy.data.collections.remove(c, do_unlink=True)
 
-    for o in bpy.data.objects:
+    for o in objects:
         bpy.data.objects.remove(o, do_unlink=True)
 
 
@@ -365,20 +377,24 @@ def sarginCizimCalistir():
                             element.get('z1'),
                             ad);
 
-        # kameraOlustur();
+        kameraOlustur();
         renderAl('sarginlar@gmail.com', '123')
         # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-        bpy.app.handlers.render_post.clear()
         bpy.app.handlers.render_post.append(SendEmailToCustomer)
 
 
 def in_10_seconds():
+    deleteAllObject()
+
+
+def in_40_seconds():
     sarginCizimCalistir()
 
 
 if __name__ == '__main__':
     sarginCizimCalistir()
-    bpy.app.timers.register(in_10_seconds, first_interval=35)
+    bpy.app.timers.register(in_10_seconds, first_interval=10)
+    bpy.app.timers.register(in_40_seconds, first_interval=40)
 
 
 class Send:
