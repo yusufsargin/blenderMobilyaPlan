@@ -21,7 +21,6 @@ sahnedeki_objeler = [];
 
 global CustomerEmail
 global CustomerName
-global CustomerId
 
 bl_info = {
     "name": "Sargin Render",
@@ -254,7 +253,6 @@ def kameraOlustur():
 
 
 def renderAl(customerEmail, id):
-    print(bpy.context.scene)
     scene = bpy.data.scenes['Scene']
     scene.render.image_settings.file_format = 'PNG';
     global ImgFilePath
@@ -262,8 +260,18 @@ def renderAl(customerEmail, id):
     ImgFilePath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
 
     scene.render.filepath = ImgFilePath
-    bpy.ops.render.render('INVOKE_DEFAULT', write_still=True, use_viewport=True);
+
+    bpy.ops.render.render(afterRender(), 'INVOKE_DEFAULT', write_still=True, use_viewport=True);
     return ImgFilePath
+
+
+def afterRender():
+    window = bpy.context.window_manager.windows[0]
+    screen = window.screen
+
+    o = {"window": window}
+
+    return o
 
 
 def assignMaterial(textureAdi='test', obj=bpy.context.active_object):
@@ -288,7 +296,9 @@ def createNewScene():
 
 @persistent
 def trigger(dummy):
-    pass
+    print(CustomerId)
+    elemet = DatabaseConnection.Collection()
+    elemet.changeRenderStatus(CustomerId)
 
 
 def deleteAllObject():
@@ -303,6 +313,7 @@ def deleteAllObject():
 
 
 def sarginCizimCalistir():
+    deleteAllObject()
     global databaseItem
     databaseItem = DatabaseConnection.Collection();
     isEmpty = databaseItem.getDataFromDatabase();
@@ -310,6 +321,7 @@ def sarginCizimCalistir():
     count = 0;
 
     if not isEmpty:
+        global CustomerId
         CustomerId = databaseItem.shortedData[0].get('databaseId')
         print(CustomerId)
         CustomerEmail = databaseItem.shortedData[0].get('musteriEmail', 'sarginlar@gmail.com')
@@ -335,21 +347,19 @@ def sarginCizimCalistir():
         kameraOlustur();
         renderAl('sarginlar@gmail.com', '123')
         # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-        bpy.app.handlers.render_post.append(SendEmailToCustomer)
+        # bpy.app.handlers.render_post.append(SendEmailToCustomer)
+        bpy.app.handlers.render_post.append(trigger)
 
 
-def in_10_seconds():
-    deleteAllObject()
 
-
-def in_40_seconds():
+def every_50_seconds():
     sarginCizimCalistir()
+    return 50.0
 
 
 if __name__ == '__main__':
     sarginCizimCalistir()
-    bpy.app.timers.register(in_10_seconds, first_interval=10)
-    bpy.app.timers.register(in_40_seconds, first_interval=40)
+    bpy.app.timers.register(every_50_seconds, first_interval=10)
 
 
 class Send:
