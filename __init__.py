@@ -22,44 +22,13 @@ sahnedeki_objeler = [];
 global CustomerEmail
 global CustomerName
 global CustomerId
-global databaseItem
 
-
-def delay(delay=0.):
-    """
-    Decorator delaying the execution of a function for a while.
-    Decorator delaying the execution of a function for a while.
-    """
-
-    def wrap(f):
-        @wraps(f)
-        def delayed(*args, **kwargs):
-            timer = threading.Timer(delay, f, args=args, kwargs=kwargs)
-            timer.start()
-
-        return delayed
-
-    return wrap
-
-
-class Timer():
-    toClearTimer = False
-
-    def setTimeout(self, fn, time):
-        isInvokationCancelled = False
-
-        @delay(time)
-        def some_fn():
-            if (self.toClearTimer is False):
-                fn()
-            else:
-                print('Invokation is cleared!')
-
-        some_fn()
-        return isInvokationCancelled
-
-    def setClearTimer(self):
-        self.toClearTimer = True
+bl_info = {
+    "name": "Sargin Render",
+    "author": "Yusuf Sargin",
+    "version": (0, 5, 6, 6),
+    "blender": (2, 8, 0)
+}
 
 
 def make_offset(obj, yon=1, ust=0, yan=0):
@@ -285,30 +254,15 @@ def kameraOlustur():
 
 
 def renderAl(customerEmail, id):
-    idx = bpy.context.window_manager.windows[:].index(bpy.context.window)
-    window = bpy.context.window_manager.windows[idx]
-    screen = window.screen
-    views_3d = sorted(
-        [a for a in screen.areas if a.type == 'VIEW_3D'],
-        key=lambda a: (a.width * a.height))
-    if views_3d:
-        a = views_3d[0]
-        # override
-        o = {"window": window,
-             "screen": screen,
-             "area": a,
-             "space_data": a.spaces.active,
-             "region": a.regions[-1]
-             }
-
-    scene = bpy.context.scene;
+    print(bpy.context.scene)
+    scene = bpy.data.scenes['Scene']
     scene.render.image_settings.file_format = 'PNG';
     global ImgFilePath
 
     ImgFilePath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
 
     scene.render.filepath = ImgFilePath
-    bpy.ops.render.render(o, 'INVOKE_DEFAULT', write_still=False, animation=False);
+    bpy.ops.render.render('INVOKE_DEFAULT', write_still=True, use_viewport=True);
     return ImgFilePath
 
 
@@ -334,7 +288,7 @@ def createNewScene():
 
 @persistent
 def trigger(dummy):
-    createNewScene()
+    pass
 
 
 def deleteAllObject():
@@ -349,6 +303,7 @@ def deleteAllObject():
 
 
 def sarginCizimCalistir():
+    global databaseItem
     databaseItem = DatabaseConnection.Collection();
     isEmpty = databaseItem.getDataFromDatabase();
     mod_isim = [];
