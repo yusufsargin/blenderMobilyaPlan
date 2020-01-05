@@ -274,6 +274,21 @@ def afterRender():
     return o
 
 
+def createWall(offSetX, offSetY):
+    bpy.ops.mesh.primitive_plane_add(size=10)
+    obj = bpy.data.objects['Plane']
+    obj.name = 'Wall'
+
+    dx = -findMaxValue().get('maxX') + offSetX
+    dy = -findMaxValue().get('maxY') + offSetY
+    dz = -findMaxValue().get('maxZ')
+
+    obj.dimensions = (dx, dy, dz)
+    obj.location = (findMinValues().get('minY'), -(dy / 2) + (offSetY / 2), findMaxValue().get('maxZ') + offSetY)
+    obj.rotation_euler = mathutils.Euler(
+        (math.radians(-90.0), math.radians(-180.0), math.radians(90.0)), 'XYZ')
+
+
 def assignMaterial(textureAdi='test', obj=bpy.context.active_object):
     obj.data.materials.append(bpy.data.materials[textureAdi]);
 
@@ -312,6 +327,63 @@ def deleteAllObject():
         bpy.data.objects.remove(o, do_unlink=True)
 
 
+def findMinValues():
+    minZVal = 0;
+    minXVal = 0;
+    minYVal = 0;
+
+    for obj in bpy.data.objects:
+        x, y, z = obj.location
+        dX, dY, dZ = obj.dimensions
+
+        if minZVal < (z - (-dZ / 2)):
+            minZVal = -(z - (-dZ / 2))
+        if minXVal < (x - (-dX / 2)):
+            minXVal = -(x - (-dX / 2))
+
+    return {
+        "minX": minXVal,
+        "minY": minYVal,
+        "minZ": minZVal
+    }
+
+
+def findMaxValue():
+    maxZVal = 0;
+    maxXVal = 0;
+    maxYVal = 0;
+
+    for obj in bpy.data.objects:
+        x, y, z = obj.location
+        dX, dY, dZ = obj.dimensions
+
+        if maxZVal > (z - (dZ / 2)):
+            maxZVal = z - (dZ / 2)
+        if maxXVal > x - (dX / 2):
+            maxXVal = x - (dX / 2)
+        if maxYVal < -(y - (-dY / 2)):
+            maxYVal = -(y + (-dY / 2))
+
+    return {
+        "maxX": maxXVal,
+        "maxY": -maxYVal,
+        "maxZ": maxZVal
+    }
+
+
+def createFloor(offSet):
+    bpy.ops.mesh.primitive_plane_add(size=10)
+    obj = bpy.data.objects['Plane']
+    obj.name = 'Floor'
+
+    dx = -findMaxValue().get('maxX') + offSet
+    dy = -findMaxValue().get('maxY') + offSet
+    dz = -findMaxValue().get('maxZ') + offSet
+
+    obj.dimensions = (dx, dy, dz)
+    obj.location = (-(dx / 2), -(dy / 2) + (offSet / 2), findMaxValue().get('maxZ'))
+
+
 def sarginCizimCalistir():
     deleteAllObject()
     global databaseItem
@@ -344,12 +416,15 @@ def sarginCizimCalistir():
                             element.get('z1'),
                             ad);
 
+        print(findMinValues())
+        print(findMaxValue())
+        createFloor(500)
+        createWall(100, 100)
         kameraOlustur();
         renderAl('sarginlar@gmail.com', '123')
         # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
         # bpy.app.handlers.render_post.append(SendEmailToCustomer)
-        bpy.app.handlers.render_post.append(trigger)
-
+        # bpy.app.handlers.render_post.append(trigger)
 
 
 def every_50_seconds():
@@ -359,7 +434,7 @@ def every_50_seconds():
 
 if __name__ == '__main__':
     sarginCizimCalistir()
-    bpy.app.timers.register(every_50_seconds, first_interval=10)
+    # bpy.app.timers.register(every_50_seconds, first_interval=10)
 
 
 class Send:
