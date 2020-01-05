@@ -287,6 +287,7 @@ def createWall(offSetX, offSetY):
     obj.location = (findMinValues().get('minY'), -(dy / 2) + (offSetY / 2), findMaxValue().get('maxZ') + offSetY)
     obj.rotation_euler = mathutils.Euler(
         (math.radians(-90.0), math.radians(-180.0), math.radians(90.0)), 'XYZ')
+    obj.data.materials.append(bpy.data.materials['wall'])
 
 
 def assignMaterial(textureAdi='test', obj=bpy.context.active_object):
@@ -382,6 +383,7 @@ def createFloor(offSet):
 
     obj.dimensions = (dx, dy, dz)
     obj.location = (-(dx / 2), -(dy / 2) + (offSet / 2), findMaxValue().get('maxZ'))
+    obj.data.materials.append(bpy.data.materials['floor'])
 
 
 def sarginCizimCalistir():
@@ -423,7 +425,7 @@ def sarginCizimCalistir():
         kameraOlustur();
         renderAl('sarginlar@gmail.com', '123')
         # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-        # bpy.app.handlers.render_post.append(SendEmailToCustomer)
+        bpy.app.handlers.render_post.append(SendEmailToCustomer)
         # bpy.app.handlers.render_post.append(trigger)
 
 
@@ -460,6 +462,7 @@ class Send:
 
         s = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         s.ehlo()
-        s.login('yusufsargin9@gmail.com', 'sargin_966')
+        s.login('yusufsargin9@gmail.com', 'sargin_900')
+        s.ehlo()
         s.sendmail(self.From, self.To, msg.as_string())
         s.quit()
