@@ -5,22 +5,6 @@
 - Blender üzerinden geliştirdiğimiz sistem sayesinde müşteriler internette çizdikleri SVG çizimlerin
 Render görüntülerini dakikalar içerisinde kendilene mail olarak alabileceklerdir.
 
-# Program Çalışma Mantığı
-
-- İnternet sitemizde çizilen çizimler ara servis aracılığı ile blender'a gelmektedir. Gelen
-çizimlerin datalarına göre Blender üzrinde çizimi yapılmaktadır. Yapılan çizimler yine siteden
-Gönderilen texture  kodları ile UvMap yapılarak giydirilmektedir. Üzerinde bump ve normal mapler
-blender tarafından üretilmektedir. Buna göre Cycle üzerinde 120 sample ile render alınmaktadır.
-Alınan render ortalama süresi 30sn-1 dk arasında değişmektedir. Program kendi içerisinde her 
-20 saniyede Database'i tetiklemektedir. Böyledece program render yaparken Database kaydedilen
-çizimler için veriliş zamanına göre bir kuyruk oluşturur. Burada blender'ın event based
-yapısı kullanılmıştır. Renderı biten çizim gönderen kişini mail adresine gmail üzerine yazılan bir
-servis ile  gönderilir. Render olan üyeler Database üzerine kaydedilmekte. Böylece arada 
-yazdığımız serviste müşterilerin render sayılarına göre maliyet  hesabı yapılmaktadır. Arada çıkabilecek
-arızalar yazdığımız test sistemi sayesinde yakalanıp bize blender (.blend) formatında mail atılmaktadır.
-Böylece müşterinin yaşadığı sıkıntı kolayca giderilebilmektedir.  Yazdığımız ara servisde 
-müşteriye ulaşılarak hatası giderilebilecektir.
-
 # Sektörde yeri
 
 - Yaptığımız pazar analizlerinde ve üyelerimiz olan yaklaşık 120 mobilyacı üzerinden topladığımız verilere
