@@ -12,15 +12,14 @@ import threading
 from functools import wraps
 import mathutils
 import math
+from SendEmail import Send
+from CreateWalls import Walls
 
 standard_kalinlik = 0.018;
 standard_derinlik = 0.60;
 standard_yukseklik = 0.75;
 standard_genislik = 0.65;
 sahnedeki_objeler = [];
-
-global CustomerEmail
-global CustomerName
 
 bl_info = {
     "name": "Sargin Render",
@@ -300,9 +299,14 @@ class SarginDraw():
     def renderAl(self, customerEmail, id):
         scene = bpy.data.scenes['Scene']
         scene.render.image_settings.file_format = 'PNG';
-        global ImgFilePath
 
-        ImgFilePath = 'D:\\blenderRenderImage\\' + customerEmail + '_' + id + '.png';
+        global ImgFilePath
+        global CustomerEmail
+        global CustomerID
+
+        CustomerEmail, CustomerID = self.CustomerEmail, self.CustomerId
+
+        ImgFilePath = 'D:\\blenderRenderImage\\' + CustomerEmail + '_' + CustomerID + '.png';
 
         scene.render.filepath = ImgFilePath
 
@@ -340,11 +344,11 @@ class SarginDraw():
     def SendEmailToCustomer(self, dummy):
         print('Path : ' + ImgFilePath)
 
-        emailGonder = Send(To='sarginlar@gmail.com',
+        emailGonder = Send(To=CustomerEmail,
                            ImgFolder=ImgFilePath,
-                           name='MobilyaPlan_' + 'CustomerName')
+                           name='MobilyaPlan_' + CustomerID)
         emailGonder.sendEmail();
-        databaseItem.changeRenderStatus(CustomerId)
+        databaseItem.changeRenderStatus(CustomerID)
         self.isRender = True
 
     def createNewScene(self):
@@ -425,7 +429,6 @@ class SarginDraw():
 
         # link them to scene
         scene = bpy.context.scene
-        print(data_to.objects)
         for obj in data_to.objects:
             if obj is not None:
                 self.setPostionObj(obj, element.get('x_1'), element.get('y_1'), element.get('z_1'))
@@ -444,14 +447,13 @@ class SarginDraw():
             count = 0;
 
             if not isEmpty:
-                global CustomerId
-                CustomerId = databaseItem.shortedData[0].get('databaseId')
-                print(CustomerId)
-                CustomerEmail = databaseItem.shortedData[0].get('musteriEmail', 'sarginlar@gmail.com')
-                CustomerName = databaseItem.shortedData[0].get('musteriAdi', 'MobilyaPlan')
+                self.CustomerId = databaseItem.shortedData[0].get('databaseId')
+                print(self.CustomerId)
+                self.CustomerEmail = databaseItem.shortedData[0].get('musteriEmail', 'sarginlar@gmail.com')
+                self.CustomerName = databaseItem.shortedData[0].get('musteriAdi', 'MobilyaPlan')
 
-                print('CustomerName: ' + CustomerName)
-                print('CustomerEmail: ' + CustomerEmail)
+                print('CustomerName: ' + self.CustomerName)
+                print('CustomerEmail: ' + self.CustomerEmail)
 
                 for element in databaseItem.shortedData[0].get('databaseItems'):
                     mod_isim.append(element.get('modül_adı'))
@@ -469,11 +471,12 @@ class SarginDraw():
                                          ad);
 
                 self.createFloor(500)
-                self.createWall(100, 100)
-                self.kameraOlustur();
-                self.renderAl('sarginlar@gmail.com', '123')
+                wall = Walls()
+                wall.createBox()
+                self.kameraOlustur()
+                self.renderAl(self.CustomerEmail, self.CustomerId)
                 # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-                # bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
+                bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
 
     def every_10_seconds(self):
         self.sarginCizimCalistir()
@@ -497,8 +500,7 @@ if __name__ == '__main__':
     cizim.sarginCizimCalistir()
     # bpy.app.timers.register(every_30_seconds, first_interval=10)
 
-
-class Send:
+"""class Send:
     def __init__(self, To, ImgFolder, name):
         self.To = 'sarginlar@gmail.com'
         self.ImgFolder = ImgFolder
@@ -523,4 +525,4 @@ class Send:
         s.ehlo()
         s.login('yusufsargin9@gmail.com', 'sargin_900')
         s.sendmail(self.From, self.To, msg.as_string())
-        s.quit()
+        s.quit()"""

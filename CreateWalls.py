@@ -49,7 +49,12 @@ class Walls():
 
         return maxPoints
 
-    def createCubeObjInBlender(self, name='Cube', dimensions=[0, 0, 0], location=(0, 0, 0)):
+    def centerPoint(self):
+        return [(self.findMaxPoints().get('maxX') - self.findMinPoints().get('minX')) / 2,
+                (self.findMaxPoints().get('maxY') - self.findMinPoints().get('minY')) / 2,
+                (self.findMaxPoints().get('maxZ') - self.findMinPoints().get('minZ')) / 2]
+
+    def createCubeObjInBlender(self, name='Cube', dimensions=[0, 0, 0], location=[0, 0, 0], texture='wall'):
         bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False);
         obj = bpy.context.scene.objects["Cube"]  # Get the object
         bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
@@ -58,9 +63,13 @@ class Walls():
         obj.name = name
         obj.dimensions = (dimensions[0], dimensions[1], dimensions[2])
         obj.location = (location[0], location[1], location[2])
+        obj.data.materials.append(bpy.data.materials[texture])
 
         return obj
 
     def createBox(self):
-        minPoints = self.findMinPoints()
         maxPoints = self.findMaxPoints()
+
+        self.createCubeObjInBlender('Walls', [abs(maxPoints.get('maxX')), abs(maxPoints.get('maxY')),
+                                              abs(maxPoints.get('maxZ'))],
+                                    location=self.centerPoint())
