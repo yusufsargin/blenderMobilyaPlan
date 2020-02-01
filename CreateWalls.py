@@ -2,74 +2,78 @@ import bpy
 
 
 class Walls():
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def findMinPoints(self):
-        minPoints = {
-            "minX": 0,
-            "minY": 0,
-            "minZ": 0
-        }
+    def findMinValues(self):
+        minZVal = 0;
+        minXVal = 0;
+        minYVal = 0;
 
         for obj in bpy.data.objects:
-            x, y, z = obj.dimensions
-            lx, ly, lz = obj.location
-            # for x
-            if minPoints.get('minX', 0) > abs(lx):
-                minPoints['minX'] = lx + (x / 2)
-            # for y
-            if minPoints.get('minY', 0) > abs(ly):
-                minPoints['minY'] = ly + (y / 2)
-            if minPoints.get('minZ') < abs(lz):
-                minPoints['minZ'] = lz - (z / 2)
+            x, y, z = obj.location
+            dX, dY, dZ = obj.dimensions
 
-        return minPoints
+            if minZVal < (z - (-dZ / 2)):
+                minZVal = -(z - (-dZ / 2))
+            if minXVal < (x - (-dX / 2)):
+                minXVal = -(x - (-dX / 2))
+            if minYVal < (y - (dY / 2)):
+                minYVal = -(y - (dY / 2))
 
-    def findMaxPoints(self):
-        maxPoints = {
-            "maxX": 0,
-            "maxY": 0,
-            "maxZ": 0
+        print('MIN ' + str(minXVal) + ',' + str(minYVal) + ',' + str(minZVal))
+
+        return {
+            "minX": minXVal,
+            "minY": minYVal,
+            "minZ": minZVal
         }
 
-        for obj in bpy.data.objects:
-            x, y, z = obj.dimensions
-            lx, ly, lz = obj.location
-            # for x
-            if maxPoints.get('maxX', 0) < abs(lx):
-                maxPoints['maxX'] = lx - (x / 2)
-            # for y
-            if maxPoints.get('maxY', 0) < abs(ly):
-                maxPoints['maxY'] = ly - (y / 2)
-            if maxPoints.get('maxZ') > abs(lz):
-                maxPoints['maxZ'] = lz + (z / 2)
+    def findMaxValue(self):
+        maxZVal = 0;
+        maxXVal = 0;
+        maxYVal = 0;
 
-        return maxPoints
+        for obj in bpy.data.objects:
+            x, y, z = obj.location
+            dX, dY, dZ = obj.dimensions
+
+            if maxZVal > (z - (dZ / 2)):
+                maxZVal = z - (dZ / 2)
+            if maxXVal > x - (dX / 2):
+                maxXVal = x - (dX / 2)
+            if maxYVal < -(y - (-dY / 2)):
+                maxYVal = -(y + (-dY / 2))
+
+        print('MAX ' + str(maxXVal) + ',' + str(maxYVal) + ',' + str(maxZVal))
+
+        return {
+            "maxX": maxXVal,
+            "maxY": -maxYVal,
+            "maxZ": maxZVal
+        }
 
     def centerPoint(self):
-        return [(self.findMaxPoints().get('maxX') - self.findMinPoints().get('minX')) / 2,
-                (self.findMaxPoints().get('maxY') - self.findMinPoints().get('minY')) / 2,
-                (self.findMaxPoints().get('maxZ') - self.findMinPoints().get('minZ')) / 2]
+        return [(self.findMaxValue().get('maxX') - self.findMinValues().get('minX')) / 2,
+                (self.findMaxValue().get('maxY') - self.findMinValues().get('minY')) / 2,
+                (self.findMaxValue().get('maxZ') - self.findMinValues().get('minZ')) / 2]
 
-    def createCubeObjInBlender(self, name='Cube', dimensions=[0, 0, 0], location=[0, 0, 0], texture='wall'):
+    def createCubeObjInBlender(self, name='Cube', dimensions=[0, 0, 0], location=[0, 0, 0], texture='wall',
+                               offSet=[0, 0, 0]):
         bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False);
         obj = bpy.context.scene.objects["Cube"]  # Get the object
         bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
         bpy.context.view_layer.objects.active = obj
 
         obj.name = name
-        obj.dimensions = (dimensions[0], dimensions[1], dimensions[2])
-        obj.location = (location[0], location[1], location[2])
+        obj.dimensions = (dimensions[0] + offSet[0], dimensions[1] + offSet[1], dimensions[2] + offSet[2])
+        obj.location = (location[0] - (offSet[0] / 2), location[1],
+                        location[2] - (offSet[2] / 2))
         obj.data.materials.append(bpy.data.materials[texture])
 
         return obj
 
-    def createBox(self):
-        maxPoints = self.findMaxPoints()
+    def createBox(self, offset=[0, 0, 0]):
+        maxPoints = self.findMaxValue()
 
         self.createCubeObjInBlender('Walls', [abs(maxPoints.get('maxX')), abs(maxPoints.get('maxY')),
                                               abs(maxPoints.get('maxZ'))],
-                                    location=self.centerPoint())
+                                    location=self.centerPoint(),
+                                    offSet=offset)

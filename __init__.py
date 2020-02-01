@@ -96,7 +96,6 @@ class SarginDraw():
             obj.dimensions = (kalinlik, modul_genislik, yukseklik);
             obj.location = (-(kalinlik / 2), -(modul_genislik / 2), -(yukseklik / 2));
         else:
-            print(yon);
             print('\n');
 
         if (locationX is not 0) or (locationY is not 0) or (locationZ is not 0):
@@ -132,7 +131,6 @@ class SarginDraw():
                 for data in DataCollectionJson[key]:
                     if type(DataCollectionJson[key][data]) == dict and DataCollectionJson[key][data].get('dahil',
                                                                                                          False) == True:
-                        print(DataCollectionJson[key][data])
                         if DataCollectionJson[key][data].get('tip') == 3:
                             genislik = DataCollectionJson[key][data].get('boy');
                         else:
@@ -378,6 +376,10 @@ class SarginDraw():
                 minZVal = -(z - (-dZ / 2))
             if minXVal < (x - (-dX / 2)):
                 minXVal = -(x - (-dX / 2))
+            if minYVal < (y - (dY / 2)):
+                minYVal = -(y - (dY / 2))
+
+        print('MIN ' + str(minXVal) + ',' + str(minYVal) + ',' + str(minZVal))
 
         return {
             "minX": minXVal,
@@ -401,6 +403,8 @@ class SarginDraw():
             if maxYVal < -(y - (-dY / 2)):
                 maxYVal = -(y + (-dY / 2))
 
+        print('MAX ' + str(maxXVal) + ',' + str(maxYVal) + ',' + str(maxZVal))
+
         return {
             "maxX": maxXVal,
             "maxY": -maxYVal,
@@ -412,6 +416,7 @@ class SarginDraw():
         obj = bpy.data.objects['Plane']
         obj.name = 'Floor'
 
+        test = self.findMinValues();
         dx = -self.findMaxValue().get('maxX') + offSet
         dy = -self.findMaxValue().get('maxY') + offSet
         dz = -self.findMaxValue().get('maxZ') + offSet
@@ -470,13 +475,13 @@ class SarginDraw():
                                          element.get('z1'),
                                          ad);
 
-                self.createFloor(500)
                 wall = Walls()
-                wall.createBox()
+                wall.createBox(offset=[300, 300, 0])
+                self.createFloor(500)
                 self.kameraOlustur()
-                self.renderAl(self.CustomerEmail, self.CustomerId)
+                # self.renderAl(self.CustomerEmail, self.CustomerId)
                 # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-                bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
+                # bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
 
     def every_10_seconds(self):
         self.sarginCizimCalistir()
