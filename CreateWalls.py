@@ -55,6 +55,53 @@ class Walls():
                 (self.findMaxValue().get('maxY') - self.findMinValues().get('minY')) / 2,
                 (self.findMaxValue().get('maxZ') - self.findMinValues().get('minZ')) / 2]
 
+    def createWalls(self, dimensions=[0, 0, 0], offset=[0, 0, 0], location=[0, 0, 0], texture='wall'):
+        # Wall1-------------------------------
+        bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False)
+        obj = bpy.context.scene.objects['Cube']
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = obj
+        obj.data.materials.append(bpy.data.materials[texture])
+
+        obj.name = 'wall1'
+        obj.dimensions = (dimensions[0] + offset[0], 1.8, dimensions[2] + offset[2])
+        obj.location = (location[0] - (offset[0] / 2), -1.8, location[2] - (offset[2] / 2))
+
+        # Wall2---------------------------------
+        bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False)
+        obj = bpy.context.scene.objects['Cube']
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = obj
+        obj.data.materials.append(bpy.data.materials[texture])
+
+        obj.name = 'wall2'
+        obj.dimensions = (1.8, dimensions[1] + offset[1], dimensions[2] + offset[2])
+        obj.location = (-1.8, location[1] - (offset[1] / 2), location[2] - (offset[2] / 2))
+
+        # Wall3---------------------------------
+        bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False)
+        obj = bpy.context.scene.objects['Cube']
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = obj
+        obj.data.materials.append(bpy.data.materials[texture])
+
+        obj.name = 'wall3'
+        obj.dimensions = (dimensions[1] + offset[1], 1.8, dimensions[2] + offset[2])
+        obj.location = (
+            location[0] - (offset[0] / 2), (location[1]) - (offset[1]), location[2] - (offset[2] / 2))
+
+        # Wall4---------------------------------
+        bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False)
+        obj = bpy.context.scene.objects['Cube']
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = obj
+        obj.data.materials.append(bpy.data.materials[texture])
+
+        obj.name = 'wall4'
+        obj.dimensions = (1.8, dimensions[1] + offset[1], dimensions[2] + offset[2])
+        obj.location = (
+            (location[0]) - (offset[0]), location[1] - (offset[1] / 2), location[2] - (offset[2] / 2))
+
     def createCubeObjInBlender(self, name='Cube', dimensions=[0, 0, 0], location=[0, 0, 0], texture='wall',
                                offSet=[0, 0, 0]):
         bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False);
@@ -73,7 +120,10 @@ class Walls():
     def createBox(self, offset=[0, 0, 0]):
         maxPoints = self.findMaxValue()
 
-        self.createCubeObjInBlender('Walls', [abs(maxPoints.get('maxX')), abs(maxPoints.get('maxY')),
+        """self.createCubeObjInBlender('Walls', [abs(maxPoints.get('maxX')), abs(maxPoints.get('maxY')),
                                               abs(maxPoints.get('maxZ'))],
                                     location=self.centerPoint(),
-                                    offSet=offset)
+                                    offSet=offset)"""
+
+        self.createWalls([abs(maxPoints.get('maxX')), abs(maxPoints.get('maxY')),
+                          abs(maxPoints.get('maxZ'))], location=self.centerPoint(), offset=offset, texture='wall')
