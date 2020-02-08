@@ -476,7 +476,7 @@ class SarginDraw():
                                          ad);
 
                 wall = Walls()
-                wall.createBox(offset=[300, 300, 0])
+                wall.createBox(offset=[600, 300, 100], kaydir=[0, 150, 0])
                 self.createFloor(500)
                 self.kameraOlustur()
                 # self.renderAl(self.CustomerEmail, self.CustomerId)
