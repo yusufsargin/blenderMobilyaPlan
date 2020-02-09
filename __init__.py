@@ -476,7 +476,21 @@ class SarginDraw():
                                          ad);
 
                 wall = Walls()
-                wall.createBox(offset=[600, 300, 100], kaydir=[0, 150, 0])
+                koseX, koseY, koseTur = [100, 50, 'sol']
+                offsetX, offsetY, offsetZ = [100, 150, 0]
+                kaydirX, kaydirY, kaydirZ = [0, 50, 0]
+
+                if koseTur == 'sol':
+                    wall.createBox(offset=[offsetX, offsetY + koseY, offsetZ],
+                                   kaydir=[kaydirX, kaydirY + koseY, kaydirZ], kose=[koseX, koseY, koseTur])
+                elif koseTur == 'sag':
+                    wall.createBox(offset=[offsetX, offsetY + koseY, offsetZ], kaydir=[kaydirX, kaydirY, kaydirZ],
+                                   kose=[koseX, koseY, koseTur])
+                else:
+                    wall.createBox(offset=[offsetX, offsetY, offsetZ], kaydir=[kaydirX, kaydirY, kaydirZ],
+                                   kose=[koseX, koseY, koseTur])
+
+                # wall.createBox(offset=[0, 0 + kose[1], 0], kaydir=[0, 0 + kose[1], 0], kose=kose)
                 self.createFloor(500)
                 self.kameraOlustur()
                 # self.renderAl(self.CustomerEmail, self.CustomerId)

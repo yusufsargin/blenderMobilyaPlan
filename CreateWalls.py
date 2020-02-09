@@ -62,37 +62,45 @@ class Walls():
         bpy.context.view_layer.objects.active = obj
         return obj
 
-    def createWallBox(self, yon='sol', kose=[0, 0], texture='wall', dimensions=[0, 0, 0], location=[0, 0, 0],
+    def createWallBox(self, yon='sol', kose=[0, 0, 'sag'], texture='wall', dimensions=[0, 0, 0], location=[0, 0, 0],
                       offset=[0, 0, 0], kaydir=[0, 0, 0], name='wall1'):
         obj = self.drawCube();
         obj.data.materials.append(bpy.data.materials[texture])
         obj.name = name
         x, y, z = dimensions
         lx, ly, lz = location
-        koseX, koseY = kose
+        koseX, koseY, koseTur = kose
+        kaydirX, kaydirY, kaydirZ = kaydir
+        offsetX, offsetY, offsetZ = offset
 
         if yon == 'sol':
-            if kose[0] != 0 or kose[1] != 0:
-                obj.dimensions = (x - koseX + offset[0], 1.8, z + offset[2])
+            if (kose[0] != 0 or kose[1] != 0) and koseTur == 'sol':
                 solObj = self.drawCube()
                 solObj.name = 'solKose'
-                obj.data.materials.append(bpy.data.materials[texture])
-                solObj.dimensions = (1.8, koseY, z + offset[2])
-                solObj.location = (-koseX, -(koseY / 2), lz + (offset[2] / 2) + kaydir[2])
-            else:
-                obj.dimensions = (x + offset[0], 1.8, z + offset[2])
-                obj.location = (
-                    lx - (offset[0] / 2) + kaydir[0], -1.8 + kaydir[1],
-                    lz + (offset[2] / 2) + kaydir[2])
+                solObj.data.materials.append(bpy.data.materials[texture])
+                solObj.dimensions = (koseX, koseY, z + offset[2])
+                solObj.location = (-(koseX / 2) + kaydirX, -(koseY / 2) + kaydirY, lz + (offsetZ / 2) + kaydirZ)
+                # ---------------------------------------------------
+
+            obj.dimensions = (x + offsetX, 1.8, z + offsetZ)
+            obj.location = (
+                lx - (offsetX / 2) + kaydirX, -1.8 + kaydirY,
+                lz + (offsetZ / 2) + kaydirZ)
         elif yon == 'sag':
-            if kose[0] != 0 or kose[1] != 0:
-                pass
-            else:
-                obj.dimensions = (x + offset[0], 1.8, z + offset[2])
-                obj.location = (lx - (offset[0] / 2) + kaydir[0], (ly * 2) - (offset[1]) + kaydir[1],
-                                lz + (offset[2] / 2) + kaydir[2])
+            if (kose[0] != 0 or kose[1] != 0) and koseTur == 'sag':
+                sagObj = self.drawCube()
+                sagObj.name = 'sagKose'
+                sagObj.data.materials.append(bpy.data.materials[texture])
+                sagObj.dimensions = (koseX, koseY, z + offsetZ)
+                sagObj.location = (
+                    -(koseX / 2) + kaydirX, (koseY / 2) + kaydirY + ((ly * 2) - offsetY),
+                    lz + (offsetZ / 2) + kaydirZ)
+
+            obj.dimensions = (x + offset[0], 1.8, z + offsetZ)
+            obj.location = (lx - (offsetX / 2) + kaydirX, (ly * 2) - offsetY + kaydirY,
+                            lz + (offsetZ / 2) + kaydirZ)
         elif yon == 'on':
-            if kose[0] != 0 or kose[1] != 0:
+            if kose[0] != 0 or kose[1] != 0 and koseTur == 'on':
                 pass
             else:
                 obj.dimensions = (1.8, y + offset[1], z + offset[2])
@@ -100,7 +108,7 @@ class Walls():
                     (lx * 2) - (offset[0]) + kaydir[0], ly - (offset[1] / 2) + kaydir[1],
                     lz + (offset[2] / 2) + kaydir[2])
         elif yon == 'arka':
-            if kose[0] != 0 or kose[1] != 0:
+            if (kose[0] != 0 or kose[1] != 0) and koseTur == 'arka':
                 pass
             else:
                 obj.dimensions = (1.8, y + offset[1], z + offset[2])
@@ -110,9 +118,9 @@ class Walls():
             print('Wall Error')
 
     def createWalls(self, dimensions=[0, 0, 0], offset=[0, 0, 0], location=[0, 0, 0], texture='wall', kaydir=[0, 0, 0],
-                    kose=[0, 0]):
+                    kose=[0, 0, 'sol']):
         # Sol Duvar-------------------------------
-        self.createWallBox(yon='sol', kose=[30, 30], texture=texture, dimensions=dimensions, location=location,
+        self.createWallBox(yon='sol', kose=kose, texture=texture, dimensions=dimensions, location=location,
                            offset=offset,
                            kaydir=kaydir, name='wall1')
         # Arka Duvar---------------------------------
