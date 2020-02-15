@@ -116,26 +116,35 @@ class Walls():
                     -1.8 + kaydir[0], ly - (offset[1] / 2) + kaydir[1], lz + (offset[2] / 2) + kaydir[2])
         else:
             print('Wall Error')
+            return 'ERROR'
+
+        return obj.location
 
     def createWalls(self, dimensions=[0, 0, 0], offset=[0, 0, 0], location=[0, 0, 0], texture='wall', kaydir=[0, 0, 0],
                     kose=[0, 0, 'sol']):
         # Sol Duvar-------------------------------
-        self.createWallBox(yon='sol', kose=kose, texture=texture, dimensions=dimensions, location=location,
-                           offset=offset,
-                           kaydir=kaydir, name='wall1')
+        solDuvar = self.createWallBox(yon='sol', kose=kose, texture=texture, dimensions=dimensions, location=location,
+                                      offset=offset,
+                                      kaydir=kaydir, name='wall1')
         # Arka Duvar---------------------------------
-        self.createWallBox(yon='arka', kose=kose, texture=texture, dimensions=dimensions, location=location,
-                           offset=offset,
-                           kaydir=kaydir, name='wall2')
+        arkaDuvar = self.createWallBox(yon='arka', kose=kose, texture=texture, dimensions=dimensions, location=location,
+                                       offset=offset,
+                                       kaydir=kaydir, name='wall2')
         # Sağ Duvar---------------------------------
-        self.createWallBox(yon='sag', kose=kose, texture=texture, dimensions=dimensions, location=location,
-                           offset=offset,
-                           kaydir=kaydir, name='wall3')
+        sagDuvar = self.createWallBox(yon='sag', kose=kose, texture=texture, dimensions=dimensions, location=location,
+                                      offset=offset,
+                                      kaydir=kaydir, name='wall3')
         # Ön Duvar---------------------------------
-        self.createWallBox(yon='on', kose=kose, texture=texture, dimensions=dimensions, location=location,
-                           offset=offset,
-                           kaydir=kaydir, name='wall4')
+        onDuvar = self.createWallBox(yon='on', kose=kose, texture=texture, dimensions=dimensions, location=location,
+                                     offset=offset,
+                                     kaydir=kaydir, name='wall4')
         # ------------------------------------------------------------------------------------------------
+        return {
+            'solDuvar': [solDuvar.x, solDuvar.y, solDuvar.z],
+            "arkaDuvar": [arkaDuvar.x, arkaDuvar.y, arkaDuvar.z],
+            "sagDuvar": [sagDuvar.x, sagDuvar.y, sagDuvar.z],
+            "onDuvar": [onDuvar.x, onDuvar.y, onDuvar.z]
+        }
 
     def createCubeObjInBlender(self, name='Cube', dimensions=[0, 0, 0], location=[0, 0, 0], texture='wall',
                                offSet=[0, 0, 0]):
@@ -160,6 +169,7 @@ class Walls():
                                     location=self.centerPoint(),
                                     offSet=offset)"""
 
-        self.createWalls([abs(maxPoints.get('maxX')), abs(maxPoints.get('maxY')),
-                          abs(maxPoints.get('maxZ'))], location=self.centerPoint(), offset=offset, texture='wall',
-                         kaydir=kaydir, kose=kose)
+        return self.createWalls([abs(maxPoints.get('maxX')), abs(maxPoints.get('maxY')),
+                                 abs(maxPoints.get('maxZ'))], location=self.centerPoint(), offset=offset,
+                                texture='wall',
+                                kaydir=kaydir, kose=kose)
