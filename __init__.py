@@ -350,10 +350,6 @@ class SarginDraw():
     def SendEmailToCustomer(self, dummy):
         print('Path : ' + ImgFilePath)
 
-        emailGonder = Send(To=CustomerEmail,
-                           ImgFolder=ImgFilePath,
-                           name='MobilyaPlan_' + CustomerID)
-        emailGonder.sendEmail();
         databaseItem.changeRenderStatus(CustomerID)
         self.isRender = True
 
@@ -486,12 +482,12 @@ class SarginDraw():
                 bosluk = [item for item in self.wall2 if 'boşluk_1' in item.name][0]
 
                 if bosluk != []:
-                    koseX, koseY, koseTur = [bosluk.dimensions.y, 50, 'sag']
-                    offsetX, offsetY, offsetZ = [200, 150, 0]
+                    koseX, koseY, koseTur = [bosluk.dimensions.y, 60, 'sag']
+                    offsetX, offsetY, offsetZ = [300, 50, 0]
                     kaydirX, kaydirY, kaydirZ = [0, 50, 0]
                 else:
-                    koseX, koseY, koseTur = [100, 50, 'sag']
-                    offsetX, offsetY, offsetZ = [200, 150, 0]
+                    koseX, koseY, koseTur = [100, 60, 'sag']
+                    offsetX, offsetY, offsetZ = [300, 50, 0]
                     kaydirX, kaydirY, kaydirZ = [0, 50, 0]
 
                 if koseTur == 'sol':
@@ -518,9 +514,9 @@ class SarginDraw():
 
                 self.createFloor(500)
                 self.kameraOlustur()
-                # self.renderAl(self.CustomerEmail, self.CustomerId)
+                self.renderAl(self.CustomerEmail, self.CustomerId)
                 # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-                # bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
+                bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
 
     def every_10_seconds(self):
         self.sarginCizimCalistir()

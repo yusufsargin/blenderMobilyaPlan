@@ -24,13 +24,14 @@ class Collection:
         self.firebase = pyrebase.initialize_app(self.config)
 
     def getDataFromDatabase(self):
-        #data = json.loads(requests.get('https://sarginapi.herokuapp.com/renders').text);
+        # data = json.loads(requests.get('https://sarginapi.herokuapp.com/renders').text);
         db = self.firebase.database()
 
         blenderModel = db.child("wixData").get().val()
 
         if self.filter == 'renderItem':
             for data in blenderModel:
+                print(data)
                 item = (dict(db.child('wixData').child(data).get().val()))
                 if item.get('rendered'):
                     for elementItem in item.get('cizim'):
@@ -51,7 +52,7 @@ class Collection:
                         self.databaseItems.append(elementItem);
 
                     self.customerProperty.append({
-                        'databaseId': item.get('wixId'),
+                        'databaseId': data,
                         'musteriAdi': item.get('musteriAdi'),
                         'musteriEmail': item.get('musteriEmail'),
                         'time': int(item.get('time')),
@@ -91,7 +92,7 @@ class Collection:
     def changeRenderStatus(self, id):
         db = self.firebase.database()
 
-        db.child('wixData').child(id).update({"rendered": "false"})
+        db.child('wixData').child(id).update({"rendered": False})
         # requests.post('https://sarginapi.herokuapp.com/renders/update/' + id, {'renderedStatus': False})
 
 
