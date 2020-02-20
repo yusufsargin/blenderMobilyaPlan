@@ -16,7 +16,7 @@ class Collection:
             "authDomain": "blender-44440.firebaseapp.com",
             "databaseURL": "https://blender-44440.firebaseio.com",
             "projectId": "blender-44440",
-            "storageBucket": "",
+            "storageBucket": "blender-44440.appspot.com",
             "messagingSenderId": "625093549043",
             "appId": "1:625093549043:web:fb06aaeae958bd44a15086"
         }
@@ -94,6 +94,13 @@ class Collection:
 
         db.child('wixData').child(id).update({"rendered": False})
         # requests.post('https://sarginapi.herokuapp.com/renders/update/' + id, {'renderedStatus': False})
+
+    def saveImage(self, imgName, imgFilePah):
+        storage = self.firebase.storage()
+
+        storage.child('renders/+' + imgName).put(imgFilePah)
+
+        return 'Finish'
 
 
 if __name__ == '__main__':

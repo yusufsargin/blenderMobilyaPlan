@@ -1,3 +1,5 @@
+from random import randrange
+
 import bpy
 import mathutils
 import DatabaseConnection
@@ -34,6 +36,9 @@ class SarginDraw():
     def __init__(self):
         self.isRender = True
         self.wall2 = []
+        self.wall1 = []
+        self.wall1Kapak = []
+        self.wall2Kapak = []
 
     def setPostionObj(self, obj, locationX, locationY, locationZ):
         dx, dy, dz = obj.dimensions
@@ -111,10 +116,13 @@ class SarginDraw():
             else:
                 obj.location = ((x - locationZ), (y - locationX), (z - locationY));
 
-        sahnedeki_objeler.append(obj);
-        collection.objects.link(obj);
+        sahnedeki_objeler.append(obj)
+        collection.objects.link(obj)
+
         if int(wallType) == 1:
             self.wall2.append(obj)
+        else:
+            self.wall1.append(obj)
         return obj
 
     def collection_move(self, x, y, z, collection_adi):
@@ -309,12 +317,14 @@ class SarginDraw():
         global ImgFilePath
         global CustomerEmail
         global CustomerID
+        global imgName
 
         CustomerEmail, CustomerID = self.CustomerEmail, self.CustomerId
 
         ImgFilePath = 'D:\\blenderRenderImage\\' + CustomerEmail + '_' + CustomerID + '.png';
 
         scene.render.filepath = ImgFilePath
+        imgName = CustomerEmail + '_' + CustomerID + '.png'
 
         bpy.ops.render.render(self.afterRender(), 'INVOKE_DEFAULT', write_still=True, use_viewport=True);
         return ImgFilePath
@@ -350,7 +360,8 @@ class SarginDraw():
     def SendEmailToCustomer(self, dummy):
         print('Path : ' + ImgFilePath)
 
-        databaseItem.changeRenderStatus(CustomerID)
+        #databaseItem.changeRenderStatus(CustomerID)
+        databaseItem.saveImage(imgName=imgName, imgFilePah=ImgFilePath)
         self.isRender = True
 
     def createNewScene(self):
@@ -469,7 +480,7 @@ class SarginDraw():
 
                     for isim in mod_isim:
                         if ad == isim:
-                            ad = str(element.get('modül_adı')) + '_' + str(count);
+                            ad = str(element.get('modül_adı')) + '_' + str(randrange(10))
                             count = count + 1;
 
                     self.kutu_Olustur(element, ad);
@@ -479,10 +490,10 @@ class SarginDraw():
                                          ad);
 
                 wall = Walls()
-                bosluk = [item for item in self.wall2 if 'boşluk_1' in item.name][0]
+                bosluk = [item for item in self.wall2 if 'boşluk_1' in item.name]
 
                 if bosluk != []:
-                    koseX, koseY, koseTur = [bosluk.dimensions.y, 60, 'sag']
+                    koseX, koseY, koseTur = [bosluk[0].dimensions.y, 60, 'sag']
                     offsetX, offsetY, offsetZ = [300, 50, 0]
                     kaydirX, kaydirY, kaydirZ = [0, 50, 0]
                 else:
