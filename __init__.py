@@ -360,8 +360,8 @@ class SarginDraw():
     def SendEmailToCustomer(self, dummy):
         print('Path : ' + ImgFilePath)
 
-        #databaseItem.changeRenderStatus(CustomerID)
-        databaseItem.saveImage(imgName=imgName, imgFilePah=ImgFilePath)
+        databaseItem.changeRenderStatus(CustomerID)
+        databaseItem.saveImage(imgName=imgName, imgFilePath=ImgFilePath,id=CustomerID)
         self.isRender = True
 
     def createNewScene(self):
@@ -536,7 +536,7 @@ class SarginDraw():
     def start(self):
         """self.deleteAllObject()
         self.getFirinObj()"""
-        # bpy.app.timers.register(self.every_10_seconds, first_interval=10)
+        bpy.app.timers.register(self.every_10_seconds, first_interval=10)
 
 
 def every_30_seconds():
@@ -549,7 +549,7 @@ def every_30_seconds():
 if __name__ == '__main__':
     cizim = SarginDraw()
     cizim.sarginCizimCalistir()
-    # bpy.app.timers.register(every_30_seconds, first_interval=10)
+    bpy.app.timers.register(every_30_seconds, first_interval=10)
 
 """class Send:
     def __init__(self, To, ImgFolder, name):

@@ -95,10 +95,15 @@ class Collection:
         db.child('wixData').child(id).update({"rendered": False})
         # requests.post('https://sarginapi.herokuapp.com/renders/update/' + id, {'renderedStatus': False})
 
-    def saveImage(self, imgName, imgFilePah):
+    def saveImage(self, imgName, imgFilePath, id):
         storage = self.firebase.storage()
 
-        storage.child('renders/+' + imgName).put(imgFilePah)
+        storage.child('renders/' + imgName).put(imgFilePath, 'test')
+        imgUrl = storage.child('renders/' + imgName).get_url('test')
+
+        db = self.firebase.database()
+
+        db.child('wixData').child(id).update({'imgUrl': imgUrl})
 
         return 'Finish'
 
