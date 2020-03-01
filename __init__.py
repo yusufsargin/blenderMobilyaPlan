@@ -1,21 +1,14 @@
+import math
 from random import randrange
 
 import bpy
 import mathutils
-import DatabaseConnection
 from bpy.app.handlers import persistent
+
+import DatabaseConnection
+from AccessorSettings import Accessor
+from AccessorSettings import Ankastre
 from CreateWallAsideObject import WallOtherSide
-import time
-import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-from email.mime.multipart import MIMEMultipart
-import threading
-from functools import wraps
-import mathutils
-import math
-from SendEmail import Send
 from CreateWalls import Walls
 
 standard_kalinlik = 0.018;
@@ -29,6 +22,10 @@ bl_info = {
     "author": "Yusuf Sargin",
     "version": (0, 5, 6, 6),
     "blender": (2, 8, 0)
+}
+
+config = {
+    "renderAcik": False
 }
 
 
@@ -92,7 +89,7 @@ class SarginDraw():
         obj = bpy.context.scene.objects["Cube"]  # Get the object
         bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
         bpy.context.view_layer.objects.active = obj
-        obj.name = str(isim + '_' + str(yon));
+        obj.name = str(isim + '_' + str(yon) + '_' + str(randrange(100)));
         self.assignMaterial(texture, obj);
 
         if yon is 2:  # sağ_yan
@@ -119,9 +116,9 @@ class SarginDraw():
         sahnedeki_objeler.append(obj)
         collection.objects.link(obj)
 
-        if int(wallType) == 1:
+        if int(wallType) == 1 and ('kapak' in obj.name):
             self.wall2.append(obj)
-        else:
+        elif int(wallType) == 0 and ('kapak' in obj.name):
             self.wall1.append(obj)
         return obj
 
@@ -133,7 +130,7 @@ class SarginDraw():
             obj.location = (float(old_locationX - z), float(old_locationY - x), float(old_locationZ - y));
 
     def createNewCollection(self, CollectionName='Yusuf'):
-        collection = bpy.data.collections.new(str(CollectionName));
+        collection = bpy.data.collections.new(str(CollectionName) + '_' + str(randrange(50)));
         bpy.context.scene.collection.children.link(collection);
         return bpy.data.collections[CollectionName];
 
@@ -354,14 +351,14 @@ class SarginDraw():
         obj.data.materials.append(bpy.data.materials['wall'])
 
     def assignMaterial(self, textureAdi='test', obj=bpy.context.active_object):
-        obj.data.materials.append(bpy.data.materials[textureAdi]);
+        obj.data.materials.append(bpy.data.materials[textureAdi])
 
     @persistent
     def SendEmailToCustomer(self, dummy):
         print('Path : ' + ImgFilePath)
 
         databaseItem.changeRenderStatus(CustomerID)
-        databaseItem.saveImage(imgName=imgName, imgFilePath=ImgFilePath,id=CustomerID)
+        databaseItem.saveImage(imgName=imgName, imgFilePath=ImgFilePath, id=CustomerID)
         self.isRender = True
 
     def createNewScene(self):
@@ -476,11 +473,11 @@ class SarginDraw():
 
                 for element in databaseItem.shortedData[0].get('databaseItems'):
                     mod_isim.append(element.get('modül_adı'))
-                    ad = element['modül_adı'];
+                    ad = element.get('modül_adı', 'HATA');
 
                     for isim in mod_isim:
                         if ad == isim:
-                            ad = str(element.get('modül_adı')) + '_' + str(randrange(10))
+                            ad = str(element.get('modül_adı')) + '_' + str(randrange(100))
                             count = count + 1;
 
                     self.kutu_Olustur(element, ad);
@@ -524,10 +521,18 @@ class SarginDraw():
                     asizeWall.execute([koseX, koseY, koseTur], wallLocation)
 
                 self.createFloor(500)
+
+                aksesuar = Accessor(self.wall1, self.wall2)
+                aksesuar.executeOperation()
+
+                ankastre = Ankastre(self.wall1, self.wall2)
+                ankastre.executeOperation()
+
                 self.kameraOlustur()
-                self.renderAl(self.CustomerEmail, self.CustomerId)
-                # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
-                bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
+                if config['renderAcik']:
+                    self.renderAl(self.CustomerEmail, self.CustomerId)
+                    # Renderden sonra yapılcak iş - Function içerisinde dışardan parametre almıyor.
+                    bpy.app.handlers.render_post.append(self.SendEmailToCustomer)
 
     def every_10_seconds(self):
         self.sarginCizimCalistir()
@@ -549,31 +554,6 @@ def every_30_seconds():
 if __name__ == '__main__':
     cizim = SarginDraw()
     cizim.sarginCizimCalistir()
-    bpy.app.timers.register(every_30_seconds, first_interval=10)
 
-"""class Send:
-    def __init__(self, To, ImgFolder, name):
-        self.To = 'sarginlar@gmail.com'
-        self.ImgFolder = ImgFolder
-        self.From = 'yusufsargin9@gmail.com'
-        self.Name = name
-
-    def sendEmail(self):
-        print('ELEMENT ' + self.To, self.ImgFolder, self.Name)
-
-        img_data = open(self.ImgFolder, 'rb').read()
-        msg = MIMEMultipart()
-        msg['Subject'] = 'Teşekkür Ederiz.'
-        msg['From'] = self.To
-        msg['To'] = self.From
-
-        text = MIMEText("Teşekkür Ederiz.")
-        msg.attach(text)
-        image = MIMEImage(img_data, name=self.Name)
-        msg.attach(image)
-
-        s = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        s.ehlo()
-        s.login('yusufsargin9@gmail.com', 'sargin_900')
-        s.sendmail(self.From, self.To, msg.as_string())
-        s.quit()"""
+    if config['renderAcik']:
+        bpy.app.timers.register(every_30_seconds, first_interval=10)

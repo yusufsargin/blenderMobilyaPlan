@@ -29,59 +29,60 @@ class Collection:
 
         blenderModel = db.child("wixData").get().val()
 
-        if self.filter == 'renderItem':
-            for data in blenderModel:
-                print(data)
-                item = (dict(db.child('wixData').child(data).get().val()))
-                if item.get('rendered'):
-                    for elementItem in item.get('cizim'):
-                        self.databaseItems.append(elementItem);
+        if blenderModel is not None:
+            if self.filter == 'renderItem':
+                for data in blenderModel:
+                    print(data)
+                    item = (dict(db.child('wixData').child(data).get().val()))
+                    if item.get('rendered') and item.get('cizim') != None:
+                        for elementItem in item.get('cizim'):
+                            self.databaseItems.append(elementItem);
 
-                    self.customerProperty.append({
-                        'databaseId': item.get('wixId'),
-                        'musteriAdi': item.get('musteriAdi'),
-                        'musteriEmail': item.get('musteriEmail'),
-                        'time': int(item.get('time')),
-                        'databaseItems': self.databaseItems
-                    })
-        else:
-            for data in blenderModel:
-                item = dict(db.child('wixData').child(data).get().val())
-                if not item.get('rendered'):
-                    for elementItem in item.get('cizim'):
-                        self.databaseItems.append(elementItem);
+                        self.customerProperty.append({
+                            'databaseId': item.get('wixId'),
+                            'musteriAdi': item.get('musteriAdi'),
+                            'musteriEmail': item.get('musteriEmail'),
+                            'time': int(item.get('time')),
+                            'databaseItems': self.databaseItems
+                        })
+            else:
+                for data in blenderModel:
+                    item = dict(db.child('wixData').child(data).get().val())
+                    if not item.get('rendered'):
+                        for elementItem in item.get('cizim'):
+                            self.databaseItems.append(elementItem);
 
-                    self.customerProperty.append({
-                        'databaseId': data,
-                        'musteriAdi': item.get('musteriAdi'),
-                        'musteriEmail': item.get('musteriEmail'),
-                        'time': int(item.get('time')),
-                        'databaseItems': self.databaseItems
-                    })
+                        self.customerProperty.append({
+                            'databaseId': data,
+                            'musteriAdi': item.get('musteriAdi'),
+                            'musteriEmail': item.get('musteriEmail'),
+                            'time': int(item.get('time')),
+                            'databaseItems': self.databaseItems
+                        })
 
-        """if self.filter == 'renderItem':
-            for item in data:
-                if item.get('rendered'):
-                    self.databaseItems = []
-                    for element in item['cizim']:
-                        self.databaseItems.append(element);
+            """if self.filter == 'renderItem':
+                for item in data:
+                    if item.get('rendered'):
+                        self.databaseItems = []
+                        for element in item['cizim']:
+                            self.databaseItems.append(element);
+    
+                        self.customerProperty.append({
+                            'databaseId': item.get('wixId'),
+                            'musteriAdi': item.get('musteriAdi'),
+                            'musteriEmail': item.get('musteriEmail'),
+                            'time': int(item.get('time')),
+                            'databaseItems': self.databaseItems
+                        });"""
 
-                    self.customerProperty.append({
-                        'databaseId': item.get('wixId'),
-                        'musteriAdi': item.get('musteriAdi'),
-                        'musteriEmail': item.get('musteriEmail'),
-                        'time': int(item.get('time')),
-                        'databaseItems': self.databaseItems
-                    });"""
-
-        if len(self.customerProperty) > 1:
-            for i in range(1, len(self.customerProperty)):
-                if self.customerProperty[i].get('time') > self.customerProperty[i - 1].get('time'):
-                    self.shortedData.append(self.customerProperty[i - 1])
-                else:
-                    self.shortedData.append(self.customerProperty[i])
-        elif len(self.customerProperty) != 0:
-            self.shortedData.append(self.customerProperty[0])
+            if len(self.customerProperty) > 1:
+                for i in range(1, len(self.customerProperty)):
+                    if self.customerProperty[i].get('time') > self.customerProperty[i - 1].get('time'):
+                        self.shortedData.append(self.customerProperty[i - 1])
+                    else:
+                        self.shortedData.append(self.customerProperty[i])
+            elif len(self.customerProperty) != 0:
+                self.shortedData.append(self.customerProperty[0])
 
         return len(self.shortedData) == 0
 
