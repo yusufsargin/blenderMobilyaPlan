@@ -63,6 +63,9 @@ class Accessor:
 
         return obj
 
+    def verification(self, obj):
+        return list(obj.objects) != []
+
     def transformObjRotate(self, obj, radiand=270, direction='Z'):
         """
         The Object to transform, should selected before use this function.
@@ -115,7 +118,7 @@ class Accessor:
                     self.setPosition(copyObj, [kx - (cx / 2), ky, kz + (dz / 2) - 3])
 
 
-class Ankastre(Accessor):
+class Firin(Accessor):
     def __init__(self, wall1, wall2):
         super().__init__(wall1, wall2)
         self.firinAreaCollection = [item for item in bpy.data.collections if 'alt_fırın' in item.name]
@@ -136,9 +139,6 @@ class Ankastre(Accessor):
 
         return self.firinObj
 
-    def verification(self, obj):
-        return list(obj.objects) != []
-
     def executeOperation(self):
         firin = bpy.data.objects[self.getFirinFromStorage()[0]]
         firin.location = (100, 100, 100)
@@ -153,3 +153,86 @@ class Ankastre(Accessor):
                 fdx, fdy, fdz = copyObj.dimensions
 
                 copyObj.location = (lx, ly - (fdy / 2), lz)
+
+
+class Buzdolabi(Accessor):
+    def __init__(self, wall1, wall2):
+        super().__init__(wall1, wall2)
+        self.buzdolabiAreaCollection = [item for item in bpy.data.collections if 'buzdolabı' in item.name]
+        self.buzdolabiObj = []
+
+    def getBuzdolabiFromStorage(self, buzdolabiName='buzdolabi', objName='Buzdolabi_Obj'):
+        filepath = "//" + buzdolabiName + ".blend"
+
+        with bpy.data.libraries.load(filepath) as (data_from, data_to):
+            data_to.objects = [name for name in data_from.objects if name.startswith(objName)]
+
+        # link them to scene
+        scene = bpy.context.scene
+        for obj in data_to.objects:
+            if obj is not None:
+                scene.collection.objects.link(obj)
+                self.buzdolabiObj.append(obj.name)
+
+        return self.buzdolabiObj
+
+    def executeOperation(self):
+        buzdolabi = bpy.data.objects[self.getBuzdolabiFromStorage()[0]]
+        buzdolabi.location = (100, 100, 100)
+        buzdolabiCollection = self.createNewCollection('Buzdolaplari')
+
+        for collection in self.buzdolabiAreaCollection:
+            if self.verification(collection):
+                copyObj = self.copyObject(buzdolabi, buzdolabiCollection)
+                solYan = [item for item in list(collection.objects) if 'sol yan' in item.name]
+                lx, ly, lz = solYan[0].location
+                sdx, sdy, sdz = solYan[0].dimensions
+                fdx, fdy, fdz = copyObj.dimensions
+
+                copyObj.location = (lx, ly - (fdy / 2), lz)
+
+                ldx, ldy, ldz = copyObj.location
+                locationMinBuzZ = ldz - (fdz / 2)  # 260
+                solYanMinZ = (lz - (sdz / 2))  # 280
+                last = ldz - (abs(solYanMinZ) - abs(locationMinBuzZ))
+
+                copyObj.location = (lx, ly - (fdy / 2) - (sdy / 2) - 2, last)
+                print(solYanMinZ)
+                print(locationMinBuzZ)
+
+
+class BulasikMak(Accessor):
+    def __init__(self, wall1, wall2):
+        super().__init__(wall1, wall2)
+        self.bulasikMakAreaCollection = [item for item in bpy.data.collections if 'Blşk' in item.name]
+        self.bulasikMakObj = []
+
+    def getBulasikMakFromStorage(self, buzdolabiName='bulasikmak', objName='BulasikMak_Obj'):
+        filepath = "//" + buzdolabiName + ".blend"
+
+        with bpy.data.libraries.load(filepath) as (data_from, data_to):
+            data_to.objects = [name for name in data_from.objects if name.startswith(objName)]
+
+        # link them to scene
+        scene = bpy.context.scene
+        for obj in data_to.objects:
+            if obj is not None:
+                scene.collection.objects.link(obj)
+                self.bulasikMakObj.append(obj.name)
+
+        return self.bulasikMakObj
+
+    def executeOperation(self):
+        bulasikMak = bpy.data.objects[self.getBulasikMakFromStorage()[0]]
+        bulasikMak.location = (100, 100, 100)
+        bulasikMakCollection = self.createNewCollection('BulasikMakleri')
+
+        for collection in self.bulasikMakAreaCollection:
+            if self.verification(collection):
+                copyObj = self.copyObject(bulasikMak, bulasikMakCollection)
+                solYan = [item for item in list(collection.objects) if 'sol yan' in item.name]
+                lx, ly, lz = solYan[0].location
+                dlx, dly, dlz = solYan[0].dimensions
+                fdx, fdy, fdz = copyObj.dimensions
+
+                copyObj.location = (lx, ly - (fdy / 2) - dly, lz)

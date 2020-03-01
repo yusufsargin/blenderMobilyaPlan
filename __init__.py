@@ -7,7 +7,9 @@ from bpy.app.handlers import persistent
 
 import DatabaseConnection
 from AccessorSettings import Accessor
-from AccessorSettings import Ankastre
+from AccessorSettings import BulasikMak
+from AccessorSettings import Buzdolabi
+from AccessorSettings import Firin
 from CreateWallAsideObject import WallOtherSide
 from CreateWalls import Walls
 
@@ -130,7 +132,7 @@ class SarginDraw():
             obj.location = (float(old_locationX - z), float(old_locationY - x), float(old_locationZ - y));
 
     def createNewCollection(self, CollectionName='Yusuf'):
-        collection = bpy.data.collections.new(str(CollectionName) + '_' + str(randrange(50)));
+        collection = bpy.data.collections.new(str(CollectionName));
         bpy.context.scene.collection.children.link(collection);
         return bpy.data.collections[CollectionName];
 
@@ -525,8 +527,12 @@ class SarginDraw():
                 aksesuar = Accessor(self.wall1, self.wall2)
                 aksesuar.executeOperation()
 
-                ankastre = Ankastre(self.wall1, self.wall2)
-                ankastre.executeOperation()
+                firin = Firin(self.wall1, self.wall2)
+                buzdolabi = Buzdolabi(self.wall1, self.wall2)
+                bulasikMak = BulasikMak(self.wall1, self.wall2)
+                bulasikMak.executeOperation()
+                buzdolabi.executeOperation()
+                firin.executeOperation()
 
                 self.kameraOlustur()
                 if config['renderAcik']:
