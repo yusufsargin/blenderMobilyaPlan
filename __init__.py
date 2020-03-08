@@ -143,22 +143,22 @@ class SarginDraw():
             wallType = DataCollectionJson.get('duvar_no', '0');
             if key == 'tezgah' and DataCollectionJson[key].get('dahil', False) == True:
                 for data in DataCollectionJson[key]:
-                    if type(DataCollectionJson[key][data]) == dict and DataCollectionJson[key][data].get('dahil',
+                    if type(DataCollectionJson[key].get(data)) == dict and DataCollectionJson[key].get(data).get('dahil',
                                                                                                          False) == True:
-                        if DataCollectionJson[key][data].get('tip') == 3:
-                            genislik = DataCollectionJson[key][data].get('boy');
+                        if DataCollectionJson[key].get(data).get('tip') == 3:
+                            genislik = DataCollectionJson[key].get(data).get('boy');
                         else:
-                            genislik = DataCollectionJson[key][data].get('en');
+                            genislik = DataCollectionJson[key].get(data).get('en');
 
-                        self.Obje_Olsutur(kalinlik=float(DataCollectionJson[key][data].get('kalınlık', 3)),
-                                          derinlik=float(DataCollectionJson[key][data].get('en')),
-                                          yukseklik=float(DataCollectionJson[key][data].get('boy', 0)),
+                        self.Obje_Olsutur(kalinlik=float(DataCollectionJson[key].get(data).get('kalınlık', 3)),
+                                          derinlik=float(DataCollectionJson[key].get(data).get('en')),
+                                          yukseklik=float(DataCollectionJson[key].get(data).get('boy', 0)),
                                           modul_genislik=float(genislik),
-                                          locationX=float(DataCollectionJson[key][data].get('x_1')),
-                                          locationY=float(DataCollectionJson[key][data].get('y_1')),
-                                          locationZ=float(DataCollectionJson[key][data].get('z_1')),
-                                          yon=int(DataCollectionJson[key][data].get('tip', 3)),
-                                          isim=DataCollectionJson[key][data].get('adı'), collection=collection,
+                                          locationX=float(DataCollectionJson[key].get(data).get('x_1')),
+                                          locationY=float(DataCollectionJson[key].get(data).get('y_1')),
+                                          locationZ=float(DataCollectionJson[key].get(data).get('z_1')),
+                                          yon=int(DataCollectionJson[key].get(data).get('tip', 3)),
+                                          isim=DataCollectionJson[key].get(data).get('adı'), collection=collection,
                                           texture='mermerBeyaz', wallType=wallType);
 
     def kutu_Olustur(self, DataCollectionJson, CollectionName='Yusuf'):
