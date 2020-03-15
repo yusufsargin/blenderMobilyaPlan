@@ -6,6 +6,7 @@ import mathutils
 from bpy.app.handlers import persistent
 
 import DatabaseConnection
+import DrawEngine
 from AccessorSettings import Accessor
 from AccessorSettings import BulasikMak
 from AccessorSettings import Buzdolabi
@@ -143,8 +144,9 @@ class SarginDraw():
             wallType = DataCollectionJson.get('duvar_no', '0');
             if key == 'tezgah' and DataCollectionJson[key].get('dahil', False) == True:
                 for data in DataCollectionJson[key]:
-                    if type(DataCollectionJson[key].get(data)) == dict and DataCollectionJson[key].get(data).get('dahil',
-                                                                                                         False) == True:
+                    if type(DataCollectionJson[key].get(data)) == dict and DataCollectionJson[key].get(data).get(
+                            'dahil',
+                            False) == True:
                         if DataCollectionJson[key].get(data).get('tip') == 3:
                             genislik = DataCollectionJson[key].get(data).get('boy');
                         else:
@@ -453,6 +455,7 @@ class SarginDraw():
                 scene.collection.objects.link(obj)
 
     def sarginCizimCalistir(self):
+
         if self.isRender:
             print(self.isRender)
             print('\n')
@@ -473,7 +476,9 @@ class SarginDraw():
                 print('CustomerName: ' + self.CustomerName)
                 print('CustomerEmail: ' + self.CustomerEmail)
 
-                for element in databaseItem.shortedData[0].get('databaseItems'):
+                drawEngine = DrawEngine.CreateObject(databaseItem.shortedData[0].get('databaseItems'))
+                drawEngine.dataOrganize()
+                """for element in databaseItem.shortedData[0].get('databaseItems'):
                     mod_isim.append(element.get('modül_adı'))
                     ad = element.get('modül_adı', 'HATA');
 
@@ -482,13 +487,18 @@ class SarginDraw():
                             ad = str(element.get('modül_adı')) + '_' + str(randrange(100))
                             count = count + 1;
 
-                    self.kutu_Olustur(element, ad);
+                    #self.kutu_Olustur(element, ad);
+                    drawEngine
                     self.tezgahOlustur(element, ad)
                     self.collection_move(element.get('x1'), element.get('y1'),
                                          element.get('z1'),
-                                         ad);
+                                         ad);"""
 
                 wall = Walls()
+
+                self.wall1 = drawEngine.wall1
+                self.wall2 = drawEngine.wall2
+
                 bosluk = [item for item in self.wall2 if 'boşluk_1' in item.name]
 
                 if bosluk != []:
