@@ -7,7 +7,6 @@ import mathutils
 class WallOtherSide:
     def __init__(self, items):
         self.items = items
-        print(self.items)
 
     def transformObjRotate(self, radiand=270, direction='Z'):
         """
@@ -98,44 +97,38 @@ class WallOtherSide:
         return bpy.context.selectable_objects
 
     def execute(self, corner=[0, 0, 'sag'], wallLocation={'sagDuvar': [0, 0, 0]}):
-        try:
-            if len(self.items) != 0:
-                cX, cY, cSide = corner
+        if len(self.items) != 0:
+            cX, cY, cSide = corner
 
-                if cSide == 'sag':
-                    wallX, wallY, wallZ = wallLocation.get('sagDuvar', [0, 0, 0])
-                    self.selectObj()
-                    if cX != 0 or cY != 0:
-                        self.transformObjRotate(270, 'Z')
+            if cSide == 'sag':
+                wallX, wallY, wallZ = wallLocation.get('sagDuvar', [0, 0, 0])
+                self.selectObj()
+                if cX != 0 or cY != 0:
+                    self.transformObjRotate(270, 'Z')
 
-                        minValue = self.findMinValues()
-                        minX = minValue.get('minX', 0)
-                        minY = minValue.get('minY', 0)
-                        minZ = minValue.get('minZ', 0)
+                    minValue = self.findMinValues()
+                    minX = minValue.get('minX', 0)
+                    minY = minValue.get('minY', 0)
+                    minZ = minValue.get('minZ', 0)
 
-                        # sadece x üzerinde kaydırma yapılıyor.
-                        x, y, z = [-(minX + cX), (minY + (wallY / 2)), 0]
+                    # sadece x üzerinde kaydırma yapılıyor.
+                    x, y, z = [-(minX + cX), (minY + (wallY / 2)), 0]
 
-                        self.transformObjMove((x, y, z))
+                    self.transformObjMove((x, y, z))
 
-                        koseObj = [item for item in bpy.data.objects if 'Kose' in item.name][0]
-                        koseMax = koseObj.location.x - (koseObj.dimensions.x / 2)
-                        firstObj = [item for item in bpy.data.objects if 'boşluk_1' == item.name]
-                        if len(firstObj) != 0:
-                            firstMin = firstObj[0].location.x + (firstObj[0].dimensions.y / 2)
+                    koseObj = [item for item in bpy.data.objects if 'Kose' in item.name][0]
+                    koseMax = koseObj.location.x - (koseObj.dimensions.x / 2)
+                    firstObj = [item for item in bpy.data.objects if 'boşluk_1' == item.name]
+                    if len(firstObj) != 0:
+                        firstMin = firstObj[0].location.x + (firstObj[0].dimensions.y / 2)
 
-                            diff = koseMax - firstMin
+                        diff = koseMax - firstMin
 
-                            self.selectObj()
-                            self.transformObjMove(vector=(diff, 0, 0))
+                        self.selectObj()
+                        self.transformObjMove(vector=(diff, 0, 0))
 
-                            self.selectObj()
-                            self.transformObjMove(vector=(firstObj.dimensions.y, wallY - firstObj.location.y, 0))
+                        self.selectObj()
+                        self.transformObjMove(vector=(firstObj.dimensions.y, wallY - firstObj.location.y, 0))
 
-                        return 'SUCCESS'
-        except ValueError:
-            print(ValueError)
-        except NameError:
-            print(NameError)
-        finally:
-            print('ERROR ASIDE WALL')
+                    return 'SUCCESS'
+

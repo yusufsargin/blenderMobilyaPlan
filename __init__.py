@@ -303,7 +303,6 @@ class SarginDraw():
                                             collection=collection, wallType=wallType);
 
     def kameraOlustur(self):
-        print('MODE ' + bpy.context.mode)
         bpy.ops.object.camera_add(enter_editmode=False, location=mathutils.Vector((-600.0, -180.0, -160.0)));
         bpy.context.view_layer.objects.active = bpy.data.objects['Camera']
         bpy.data.objects['Camera'].rotation_euler = mathutils.Euler(
@@ -395,8 +394,6 @@ class SarginDraw():
             if minYVal < (y - (dY / 2)):
                 minYVal = -(y - (dY / 2))
 
-        print('MIN ' + str(minXVal) + ',' + str(minYVal) + ',' + str(minZVal))
-
         return {
             "minX": minXVal,
             "minY": minYVal,
@@ -418,8 +415,6 @@ class SarginDraw():
                 maxXVal = x - (dX / 2)
             if maxYVal < -(y - (-dY / 2)):
                 maxYVal = -(y + (-dY / 2))
-
-        print('MAX ' + str(maxXVal) + ',' + str(maxYVal) + ',' + str(maxZVal))
 
         return {
             "maxX": maxXVal,
@@ -457,8 +452,6 @@ class SarginDraw():
     def sarginCizimCalistir(self):
 
         if self.isRender:
-            print(self.isRender)
-            print('\n')
             self.isRender = False
             self.deleteAllObject()
             global databaseItem
@@ -501,7 +494,7 @@ class SarginDraw():
 
                 bosluk = [item for item in self.wall2 if 'boşluk_1' in item.name]
 
-                if bosluk != []:
+                if len(bosluk) != 0:
                     koseX, koseY, koseTur = [bosluk[0].dimensions.y, 60, 'sag']
                     offsetX, offsetY, offsetZ = [300, 50, 0]
                     kaydirX, kaydirY, kaydirZ = [0, 50, 0]
@@ -528,8 +521,6 @@ class SarginDraw():
                 asizeWall = WallOtherSide(self.wall2)
 
                 if len(self.wall2) != 0:
-                    print(self.wall2)
-                    print(wallLocation)
                     asizeWall.execute([koseX, koseY, koseTur], wallLocation)
 
                 self.createFloor(500)

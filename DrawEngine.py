@@ -17,7 +17,6 @@ class CreateObject:
         self.sahnedeki_objeler = []
         self.wall2 = []
         self.wall1 = []
-        print(data)
 
     def collection_move(self, x, y, z, collection_adi):
         objects_sahne = bpy.data.collections[collection_adi].objects;
@@ -65,9 +64,9 @@ class CreateObject:
         self.sahnedeki_objeler.append(obj)
         collection.objects.link(obj)
 
-        if int(wallType) == 1 and ('kapak' in obj.name):
+        if int(wallType) == 1:
             self.wall2.append(obj)
-        elif int(wallType) == 0 and ('kapak' in obj.name):
+        elif int(wallType) == 0:
             self.wall1.append(obj)
 
         return obj
@@ -75,133 +74,127 @@ class CreateObject:
     def dataOrganize(self):
         self.lastData = []
 
-        try:
-            for items in self.data:
-                collectionName = str(items.get('modül_adı', 'isimsiz')) + str(randrange(100))
-                collection = self.createNewCollection(collectionName)
-                wallType = items.get('duvar_no', 0)
+        for items in self.data:
+            collectionName = str(items.get('modül_adı', 'isimsiz')) + str(randrange(100))
+            collection = self.createNewCollection(collectionName)
+            wallType = items.get('duvar_no', 0)
 
-                for key, value in items.items():
-                    if type(value) == dict:
-                        for keyForSub, valueForSub in value.items():
-                            if type(valueForSub) == dict and valueForSub.get(
-                                    'dahil'):
-                                if 'kulp' in valueForSub.get('ad', ''):
-                                    # Kulplar için
-                                    """
-                                    Burada sadece kulplar var.
-                                    Burdan değerler alınıp çizilecek
-                                    """
-                                    pass
-                                else:
-                                    pass
-                                    # Üst ve Alt Dolaplar için çizim
-                                    """
-                                        Burada sadece tip 3 yani üst,alt ve yatay raflar var.
-                                        Burdan değerler alınıp çizilecek
-                                        
-                                        ********************
-                                        *                  * 
-                                        ********************
-                                    """
-                                    self.lastData.append(self.Obje_Olsutur(
-                                        kalinlik=float(valueForSub.get('malzeme', {"mn": 0,
-                                                                                   "kn": 0,
-                                                                                   "adı": "66_Kar Beyaz",
-                                                                                   "kalınlık": 1.8,
-                                                                                   "image": "rgb(255,255,255)"}).get(
-                                            'kalınlık', 1.8)),
-                                        derinlik=float(valueForSub.get('en', 0)),
-                                        yukseklik=float(valueForSub.get('boy', 0)),
-                                        modul_genislik=float(valueForSub.get('boy', 0)),
-                                        locationX=float(valueForSub.get('x_1', 0)),
-                                        locationY=float(valueForSub.get('y_1', 0)),
-                                        locationZ=float(valueForSub.get('z_1', 0)),
-                                        yon=int(valueForSub.get('tip', 3)),
-                                        isim=valueForSub.get('adı', 'isimsiz'),
-                                        collection=collection, wallType=wallType))
-
-                        if value.get('dahil', False) and (value.get('tip', 0) == 1 or value.get('tip', 0) == 4):
-                            """
-                                Burada sadece tip 1 yani kapak,baza ve arkalık var. Bunlar dikey ürünler
+            for key, value in items.items():
+                if type(value) == dict:
+                    for keyForSub, valueForSub in value.items():
+                        if type(valueForSub) == dict and valueForSub.get(
+                                'dahil'):
+                            if 'kulp' in valueForSub.get('ad', ''):
+                                # Kulplar için
+                                """
+                                Burada sadece kulplar var.
                                 Burdan değerler alınıp çizilecek
-                                
-                                ***************
-                                *             *  
-                                *             * 
-                                *             *  
-                                *             *  
-                                ***************
-                            """
-                            if ('baza' in value.get('adı')) or ('arka kuşak' in value.get('adı')):
-                                # print(key, value)
-                                self.lastData.append(self.Obje_Olsutur(
-                                    kalinlik=float(value.get('malzeme', {}).get('kalınlık', 1.8)),
-                                    derinlik=float(value.get('boy', 0)),
-                                    yukseklik=float(value.get('en', 0)),
-                                    modul_genislik=float(value.get('boy', 0)),
-                                    locationX=float(value.get('x_1', 0)),
-                                    locationY=float(value.get('y_1', 0)),
-                                    locationZ=float(value.get('z_1', 0)),
-                                    yon=int(value.get('tip', 1)),
-                                    isim=value.get('adı', 'ERR'), collection=collection,
-                                    wallType=wallType))
+                                """
+                                pass
                             else:
-                                if value.get('tip', 1) == 3:
-                                    genislik = value.get('boy', 0);
-                                else:
-                                    genislik = value.get('en', 0);
-
+                                pass
+                                # Üst ve Alt Dolaplar için çizim
+                                """
+                                    Burada sadece tip 3 yani üst,alt ve yatay raflar var.
+                                    Burdan değerler alınıp çizilecek
+                                    
+                                    ********************
+                                    *                  * 
+                                    ********************
+                                """
                                 self.lastData.append(self.Obje_Olsutur(
-                                    kalinlik=float(value.get('malzeme', {}).get('kalınlık', 1.8)),
-                                    derinlik=float(value.get('en', 0)),
-                                    yukseklik=float(value.get('boy', 0)),
-                                    modul_genislik=float(genislik),
-                                    locationX=float(value.get('x_1', 0)),
-                                    locationY=float(value.get('y_1', 0)),
-                                    locationZ=float(value.get('z_1', 0)),
-                                    yon=int(value.get('tip', 1)),
-                                    isim=value.get('adı', 'isimsiz'),
+                                    kalinlik=float(valueForSub.get('malzeme', {"mn": 0,
+                                                                               "kn": 0,
+                                                                               "adı": "66_Kar Beyaz",
+                                                                               "kalınlık": 1.8,
+                                                                               "image": "rgb(255,255,255)"}).get(
+                                        'kalınlık', 1.8)),
+                                    derinlik=float(valueForSub.get('en', 0)),
+                                    yukseklik=float(valueForSub.get('boy', 0)),
+                                    modul_genislik=float(valueForSub.get('boy', 0)),
+                                    locationX=float(valueForSub.get('x_1', 0)),
+                                    locationY=float(valueForSub.get('y_1', 0)),
+                                    locationZ=float(valueForSub.get('z_1', 0)),
+                                    yon=int(valueForSub.get('tip', 3)),
+                                    isim=valueForSub.get('adı', 'isimsiz'),
                                     collection=collection, wallType=wallType))
 
-                        elif value.get('dahil', False) and value.get('tip', 0) == 2:
-                            """
-                            Burada sadece tip 2 yani sağyan,solyan var. Bunlar dikey ürünler
-                            Burdan değerler alınıp çizilecek                        
-                            ***
-                            * *
-                            * *
-                            * *
-                            * *
-                            * *
-                            * * 
-                            ***
-                            """
-                            self.lastData.append(self.Obje_Olsutur(kalinlik=float(value.get('malzeme', {"mn": 0,
-                                                                                                        "kn": 0,
-                                                                                                        "adı": "66_Kar Beyaz",
-                                                                                                        "kalınlık": 1.8,
-                                                                                                        "image": "rgb(255,255,255)"}).get(
-                                'kalınlık', 1.8)),
-                                derinlik=float(value.get('en', 0)),
-                                yukseklik=float(value.get('boy')),
+                    if value.get('dahil', False) and (value.get('tip', 0) == 1 or value.get('tip', 0) == 4):
+                        """
+                            Burada sadece tip 1 yani kapak,baza ve arkalık var. Bunlar dikey ürünler
+                            Burdan değerler alınıp çizilecek
+                            
+                            ***************
+                            *             *  
+                            *             * 
+                            *             *  
+                            *             *  
+                            ***************
+                        """
+                        if ('baza' in value.get('adı')) or ('arka kuşak' in value.get('adı')):
+                            # print(key, value)
+                            self.lastData.append(self.Obje_Olsutur(
+                                kalinlik=float(value.get('malzeme', {}).get('kalınlık', 1.8)),
+                                derinlik=float(value.get('boy', 0)),
+                                yukseklik=float(value.get('en', 0)),
                                 modul_genislik=float(value.get('boy', 0)),
                                 locationX=float(value.get('x_1', 0)),
                                 locationY=float(value.get('y_1', 0)),
                                 locationZ=float(value.get('z_1', 0)),
-                                yon=int(value.get('tip', 2)),
-                                isim=value.get('adı', 'Hatalı_Control_Et'),
+                                yon=int(value.get('tip', 1)),
+                                isim=value.get('adı', 'ERR'), collection=collection,
+                                wallType=wallType))
+                        else:
+                            if value.get('tip', 1) == 3:
+                                genislik = value.get('boy', 0);
+                            else:
+                                genislik = value.get('en', 0);
+
+                            self.lastData.append(self.Obje_Olsutur(
+                                kalinlik=float(value.get('malzeme', {}).get('kalınlık', 1.8)),
+                                derinlik=float(value.get('en', 0)),
+                                yukseklik=float(value.get('boy', 0)),
+                                modul_genislik=float(genislik),
+                                locationX=float(value.get('x_1', 0)),
+                                locationY=float(value.get('y_1', 0)),
+                                locationZ=float(value.get('z_1', 0)),
+                                yon=int(value.get('tip', 1)),
+                                isim=value.get('adı', 'isimsiz'),
                                 collection=collection, wallType=wallType))
 
-                self.collection_move(items.get('x1'), items.get('y1'),
-                                     items.get('z1'),
-                                     collectionName)
-        except ValueError:
-            print(ValueError)
-        except NameError:
-            print(NameError)
-        finally:
-            print('ERROR DRAW')
+                    elif value.get('dahil', False) and value.get('tip', 0) == 2:
+                        """
+                        Burada sadece tip 2 yani sağyan,solyan var. Bunlar dikey ürünler
+                        Burdan değerler alınıp çizilecek                        
+                        ***
+                        * *
+                        * *
+                        * *
+                        * *
+                        * *
+                        * * 
+                        ***
+                        """
+                        self.lastData.append(self.Obje_Olsutur(kalinlik=float(value.get('malzeme', {"mn": 0,
+                                                                                                    "kn": 0,
+                                                                                                    "adı": "66_Kar Beyaz",
+                                                                                                    "kalınlık": 1.8,
+                                                                                                    "image": "rgb(255,255,255)"}).get(
+                            'kalınlık', 1.8)),
+                            derinlik=float(value.get('en', 0)),
+                            yukseklik=float(value.get('boy')),
+                            modul_genislik=float(value.get('boy', 0)),
+                            locationX=float(value.get('x_1', 0)),
+                            locationY=float(value.get('y_1', 0)),
+                            locationZ=float(value.get('z_1', 0)),
+                            yon=int(value.get('tip', 2)),
+                            isim=value.get('adı', 'Hatalı_Control_Et'),
+                            collection=collection, wallType=wallType))
+
+            self.collection_move(items.get('x1'), items.get('y1'),
+                                 items.get('z1'),
+                                 collectionName)
+
 
 
 if __name__ == '__main__':
