@@ -10,21 +10,16 @@ standard_genislik = 0.65;
 sahnedeki_objeler = [];
 
 config = {
-    'isTest': False
+    'isTest': True
 }
 
 
 class CreateObject:
-    def __init__(self, data):
-        if config.get('isTest'):
-            with open('test.json', 'r', encoding='utf-8') as json_file:
-                self.data = json.load(json_file)
-            self.dataOrganize()
-        else:
-            self.data = data
-            self.sahnedeki_objeler = []
-            self.wall2 = []
-            self.wall1 = []
+    def __init__(self):
+        with open('test.json', 'r', encoding='utf-8') as json_file:
+            self.data = json.load(json_file)
+
+        self.dataOrganize()
 
     def collection_move(self, x, y, z, collection_adi):
         objects_sahne = bpy.data.collections[collection_adi].objects;
@@ -80,8 +75,6 @@ class CreateObject:
         return obj
 
     def calculateDraw(self, value, collection, wallType):
-        self.lastData = []
-
         for keyForSub, valueForSub in value.items():
             if type(valueForSub) == dict and valueForSub.get(
                     'dahil'):
@@ -93,6 +86,7 @@ class CreateObject:
                     """
                     pass
                 else:
+                    pass
                     # Üst ve Alt Dolaplar için çizim
                     """
                         Burada sadece tip 3 yani üst,alt ve yatay raflar var.
@@ -102,13 +96,6 @@ class CreateObject:
                         *                  * 
                         ********************
                     """
-                    if value.get('cekmeceControl', False):
-                        en = float(valueForSub.get('boy', 0))
-                        boy = float(valueForSub.get('en', 0))
-                    else:
-                        en = float(valueForSub.get('en', 0))
-                        boy = float(valueForSub.get('boy', 0))
-
                     self.lastData.append(self.Obje_Olsutur(
                         kalinlik=float(valueForSub.get('malzeme', {"mn": 0,
                                                                    "kn": 0,
@@ -116,9 +103,9 @@ class CreateObject:
                                                                    "kalınlık": 1.8,
                                                                    "image": "rgb(255,255,255)"}).get(
                             'kalınlık', 1.8)),
-                        derinlik=float(en),
-                        yukseklik=float(boy),
-                        modul_genislik=float(boy),
+                        derinlik=float(valueForSub.get('en', 0)),
+                        yukseklik=float(valueForSub.get('boy', 0)),
+                        modul_genislik=float(valueForSub.get('boy', 0)),
                         locationX=float(valueForSub.get('x_1', 0)),
                         locationY=float(valueForSub.get('y_1', 0)),
                         locationZ=float(valueForSub.get('z_1', 0)),
@@ -138,20 +125,13 @@ class CreateObject:
                 *             *  
                 ***************
             """
-            if value.get('cekmeceControl', False) and not 'kapak' in value.get('adı', ''):
-                en = float(value.get('boy', 0))
-                boy = float(value.get('en', 0))
-            else:
-                en = float(value.get('en', 0))
-                boy = float(value.get('boy', 0))
-
             if ('baza' in value.get('adı')) or ('arka kuşak' in value.get('adı')):
                 # print(key, value)
                 self.lastData.append(self.Obje_Olsutur(
                     kalinlik=float(value.get('malzeme', {}).get('kalınlık', 1.8)),
-                    derinlik=float(boy),
-                    yukseklik=float(en),
-                    modul_genislik=float(boy),
+                    derinlik=float(value.get('boy', 0)),
+                    yukseklik=float(value.get('en', 0)),
+                    modul_genislik=float(value.get('boy', 0)),
                     locationX=float(value.get('x_1', 0)),
                     locationY=float(value.get('y_1', 0)),
                     locationZ=float(value.get('z_1', 0)),
@@ -160,14 +140,14 @@ class CreateObject:
                     wallType=wallType))
             else:
                 if value.get('tip', 1) == 3:
-                    genislik = boy
+                    genislik = value.get('boy', 0);
                 else:
-                    genislik = en
+                    genislik = value.get('en', 0);
 
                 self.lastData.append(self.Obje_Olsutur(
                     kalinlik=float(value.get('malzeme', {}).get('kalınlık', 1.8)),
-                    derinlik=float(en),
-                    yukseklik=float(boy),
+                    derinlik=float(value.get('en', 0)),
+                    yukseklik=float(value.get('boy', 0)),
                     modul_genislik=float(genislik),
                     locationX=float(value.get('x_1', 0)),
                     locationY=float(value.get('y_1', 0)),
@@ -189,22 +169,15 @@ class CreateObject:
             * * 
             ***
             """
-            if value.get('cekmeceControl', False):
-                en = float(value.get('boy', 0))
-                boy = float(value.get('en', 0))
-            else:
-                en = float(value.get('en', 0))
-                boy = float(value.get('boy', 0))
-
             self.lastData.append(self.Obje_Olsutur(kalinlik=float(value.get('malzeme', {"mn": 0,
                                                                                         "kn": 0,
                                                                                         "adı": "66_Kar Beyaz",
                                                                                         "kalınlık": 1.8,
                                                                                         "image": "rgb(255,255,255)"}).get(
                 'kalınlık', 1.8)),
-                derinlik=float(en),
-                yukseklik=float(boy),
-                modul_genislik=float(boy),
+                derinlik=float(value.get('en', 0)),
+                yukseklik=float(value.get('boy')),
+                modul_genislik=float(value.get('boy', 0)),
                 locationX=float(value.get('x_1', 0)),
                 locationY=float(value.get('y_1', 0)),
                 locationZ=float(value.get('z_1', 0)),
@@ -212,28 +185,20 @@ class CreateObject:
                 isim=value.get('adı', 'Hatalı_Control_Et'),
                 collection=collection, wallType=wallType))
 
-        return self.lastData
-
     def dataOrganize(self):
-        for items in self.data:
+        self.lastData = []
+
+        for items in self.data.get('wixData').get('7b5f59c1-66ca-4f79-a68d-bdd6f0c5ba9b').get('cizim'):
             collectionName = str(items.get('modül_adı', 'isimsiz')) + str(randrange(100))
             collection = self.createNewCollection(collectionName)
             wallType = items.get('duvar_no', 0)
 
             for key, value in items.items():
-                if type(value) == dict:
-                    self.calculateDraw(value, collection, wallType)
-                elif type(value) == list and ('çk' in key):
+                if type(value) == list and ('çk' in key):
                     for element in value:
-                        if type(element) == dict:
-                            for keyDict, valDict in element.items():
-                                if type(valDict) == dict:
-                                    valDict['cekmeceControl'] = True
-                                    self.calculateDraw(valDict, collection, wallType)
-
-            self.collection_move(items.get('x1'), items.get('y1'),
-                                 items.get('z1'),
-                                 collectionName)
+                        for keyDict, valDict in element.items():
+                            if type(valDict) == dict:
+                                self.calculateDraw(valDict, collection, wallType)
 
 
 if __name__ == '__main__':

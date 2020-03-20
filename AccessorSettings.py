@@ -7,8 +7,8 @@ import mathutils
 
 class Accessor:
     def __init__(self, wall1, wall2):
-        self.kapakObjWall1 = [item for item in wall1 if item.location.y < -10]
-        self.kapakObjWall2 = wall2
+        self.kapakObjWall1 = [item for item in wall1 if item.location.y < -10 and 'kapak' in item.name]
+        self.kapakObjWall2 = [item for item in wall2 if 'kapak' in item.name]
         self.kulpObj = []
 
     """
