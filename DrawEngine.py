@@ -44,7 +44,7 @@ class CreateObject:
     def Obje_Olsutur(self, kalinlik=standard_kalinlik, derinlik=standard_derinlik, yukseklik=standard_yukseklik,
                      modul_genislik=0, locationX=0, locationY=0, locationZ=0, isim='Sargın',
                      collection=[],
-                     yon=1, texture='wood', wallType='0'):
+                     yon=1, texture='wood', wallType=0):
         bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False)
         obj = bpy.context.scene.objects["Cube"]  # Get the object
         bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects

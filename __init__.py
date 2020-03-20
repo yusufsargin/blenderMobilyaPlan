@@ -469,39 +469,24 @@ class SarginDraw():
                 print('CustomerName: ' + self.CustomerName)
                 print('CustomerEmail: ' + self.CustomerEmail)
 
-                drawEngine = DrawEngine.CreateObject(databaseItem.shortedData[0].get('databaseItems'))
+                drawEngine = DrawEngine.CreateObject(databaseItem.shortedData[0].get('databaseItems',{}))
                 drawEngine.dataOrganize()
-                """for element in databaseItem.shortedData[0].get('databaseItems'):
-                    mod_isim.append(element.get('modül_adı'))
-                    ad = element.get('modül_adı', 'HATA');
-
-                    for isim in mod_isim:
-                        if ad == isim:
-                            ad = str(element.get('modül_adı')) + '_' + str(randrange(100))
-                            count = count + 1;
-
-                    #self.kutu_Olustur(element, ad);
-                    drawEngine
-                    self.tezgahOlustur(element, ad)
-                    self.collection_move(element.get('x1'), element.get('y1'),
-                                         element.get('z1'),
-                                         ad);"""
 
                 wall = Walls()
 
                 self.wall1 = drawEngine.wall1
                 self.wall2 = drawEngine.wall2
 
-                bosluk = [item for item in self.wall2 if 'boşluk_1' in item.name]
+                bosluk = [item for item in self.wall2 if 'boşluk' in item.name]
 
                 if len(bosluk) != 0:
+                    offsetX, offsetY, offsetZ = [300, 50, 0]
+                    kaydirX, kaydirY, kaydirZ = [0, 50, 0]
                     koseX, koseY, koseTur = [bosluk[0].dimensions.y, 60, 'sag']
-                    offsetX, offsetY, offsetZ = [300, 50, 0]
-                    kaydirX, kaydirY, kaydirZ = [0, 50, 0]
                 else:
-                    koseX, koseY, koseTur = [100, 60, 'sag']
                     offsetX, offsetY, offsetZ = [300, 50, 0]
                     kaydirX, kaydirY, kaydirZ = [0, 50, 0]
+                    koseX, koseY, koseTur = [100, 60, 'sag']
 
                 if koseTur == 'sol':
                     wallLocation = wall.createBox(offset=[offsetX, offsetY + koseY, offsetZ],

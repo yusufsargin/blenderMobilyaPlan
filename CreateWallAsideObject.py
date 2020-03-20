@@ -23,7 +23,7 @@ class WallOtherSide:
         """
         @return {'FINISHED'} 
         """
-        return bpy.ops.transform.rotate(value=switcher.get(direction, 'Z'), orient_axis='Z',
+        return bpy.ops.transform.rotate(value=switcher.get(direction, 'Z'), orient_axis=direction,
                                         orient_type='GLOBAL',
                                         orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL',
                                         constraint_axis=(False, False, True), mirror=True, use_proportional_edit=False,
@@ -118,7 +118,8 @@ class WallOtherSide:
 
                     koseObj = [item for item in bpy.data.objects if 'Kose' in item.name][0]
                     koseMax = koseObj.location.x - (koseObj.dimensions.x / 2)
-                    firstObj = [item for item in bpy.data.objects if 'boşluk_1' == item.name]
+                    firstObj = [item for item in bpy.data.objects if 'boşluk' in item.name and item.dimensions != 0]
+                    print(firstObj)
                     if len(firstObj) != 0:
                         firstMin = firstObj[0].location.x + (firstObj[0].dimensions.y / 2)
 
@@ -128,7 +129,7 @@ class WallOtherSide:
                         self.transformObjMove(vector=(diff, 0, 0))
 
                         self.selectObj()
-                        self.transformObjMove(vector=(firstObj.dimensions.y, wallY - firstObj.location.y, 0))
+                        print('TRASFORM OBJ')
+                        self.transformObjMove(vector=(firstObj[0].dimensions.y, wallY - firstObj[0].location.y, 0))
 
                     return 'SUCCESS'
-
