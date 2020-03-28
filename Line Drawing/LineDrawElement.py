@@ -1,5 +1,6 @@
 import bpy
 
+# https://blenderscripting.blogspot.com/search/label/Curves
 
 class LineOperation:
     def __init__(self, coordinate=[(0, 0, 0), (0, 0, 0), (0, 0, 0)]):
