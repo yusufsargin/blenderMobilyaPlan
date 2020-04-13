@@ -51,7 +51,7 @@ class CreateObject:
         obj = bpy.context.scene.objects["Cube"]  # Get the object
         bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
         bpy.context.view_layer.objects.active = obj
-        obj.name = str(isim + '_' + str(yon) + '_' + str(randrange(100)) + '_' + str(wallType))
+        obj.name = str(isim + '_' + str(yon) + '_' + str(len(self.lastData)) + '_' + str(wallType))
 
         if yon == 2:  # sağ_yan
             obj.dimensions = (derinlik, kalinlik, yukseklik)
@@ -89,7 +89,6 @@ class CreateObject:
         return {'status': 'FINISH'}
 
     def calculateDraw(self, value, collection, wallType):
-
         for keyForSub, valueForSub in value.items():
             if type(valueForSub) == dict and valueForSub.get(
                     'dahil'):
@@ -107,9 +106,13 @@ class CreateObject:
                         Burdan değerler alınıp çizilecek
 
                         ********************
-                        *                  * 
+                        *                  *
                         ********************
                     """
+
+                    if 'kapak2' in valueForSub.get('adı', ''):
+                        print('KAPAK2******** RAF')
+
                     if value.get('cekmeceControl', False):
                         en = float(valueForSub.get('boy', 0))
                         boy = float(valueForSub.get('en', 0))
@@ -148,14 +151,42 @@ class CreateObject:
                 *             *  
                 ***************
             """
-            if value.get('cekmeceControl', False) and not 'kapak' in value.get('adı', ''):
+            if value.get('cekmeceControl', False) and ('kapak' not in value.get('adı', '')):
                 en = float(value.get('boy', 0))
                 boy = float(value.get('en', 0))
             else:
                 en = float(value.get('en', 0))
                 boy = float(value.get('boy', 0))
 
-            if ('baza' in value.get('adı')) or ('arka kuşak' in value.get('adı')):
+            if value.get('tip', 1) == 3:
+                genislik = boy
+            else:
+                genislik = en
+
+            """
+            TODO:
+                Sorun burda birden fazla ürün çiziyor.
+            """
+            # self.createdData = {
+            #     'kalinlik': float(value.get('malzeme', {"mn": 0,
+            #                                             "kn": 0,
+            #                                             "adı": "66_Kar Beyaz",
+            #                                             "kalınlık": 1.8,
+            #                                             "image": "rgb(255,255,255)"}).get(
+            #         'kalınlık', 1.8)),
+            #     'derinlik': float(en),
+            #     'yukseklik': float(boy),
+            #     'modul_genislik': float(genislik),
+            #     'locationX': float(value.get('x_1', 0)),
+            #     'locationY': float(value.get('y_1', 0)),
+            #     'locationZ': float(value.get('z_1', 0)),
+            #     'yon': int(value.get('tip', 3)),
+            #     'isim': value.get('adı', 'isimsiz'),
+            #     'collection': collection,
+            #     'wallType': wallType
+            # }
+
+            if ('baza' in value.get('adı', '')) or ('arka kuşak' in value.get('adı', '')):
                 # print(key, value)
                 self.createdData = {
                     'kalinlik': float(value.get('malzeme', {"mn": 0,
@@ -175,42 +206,18 @@ class CreateObject:
                     'collection': collection,
                     'wallType': wallType
                 }
-            else:
-                if value.get('tip', 1) == 3:
-                    genislik = boy
-                else:
-                    genislik = en
-
-                self.createdData = {
-                    'kalinlik': float(value.get('malzeme', {"mn": 0,
-                                                            "kn": 0,
-                                                            "adı": "66_Kar Beyaz",
-                                                            "kalınlık": 1.8,
-                                                            "image": "rgb(255,255,255)"}).get(
-                        'kalınlık', 1.8)),
-                    'derinlik': float(en),
-                    'yukseklik': float(boy),
-                    'modul_genislik': float(genislik),
-                    'locationX': float(value.get('x_1', 0)),
-                    'locationY': float(value.get('y_1', 0)),
-                    'locationZ': float(value.get('z_1', 0)),
-                    'yon': int(value.get('tip', 3)),
-                    'isim': value.get('adı', 'isimsiz'),
-                    'collection': collection,
-                    'wallType': wallType
-                }
 
         elif value.get('dahil', False) and value.get('tip', 0) == 2:
             """
             Burada sadece tip 2 yani sağyan,solyan var. Bunlar dikey ürünler
-            Burdan değerler alınıp çizilecek                        
+            Burdan değerler alınıp çizilecek
             ***
             * *
             * *
             * *
             * *
             * *
-            * * 
+            * *
             ***
             """
             if value.get('cekmeceControl', False):
@@ -219,6 +226,9 @@ class CreateObject:
             else:
                 en = float(value.get('en', 0))
                 boy = float(value.get('boy', 0))
+
+            if 'kapak2' in value.get('adı', ''):
+                print('KAPAK2******** SAĞ SOL YAN')
 
             self.createdData = {
                 'kalinlik': float(value.get('malzeme', {"mn": 0,
@@ -265,8 +275,10 @@ class CreateObject:
         return self.lastData
 
     def dataOrganize(self):
+        modulNames: list = [];
         for items in self.data:
-            collectionName = str(items.get('modül_adı', 'isimsiz')) + str(randrange(100))
+            collectionName: str = str(items.get('modül_adı', 'isimsiz')) + str(randrange(100))
+            modulNames.append((collectionName, str(items.get('modül_adı', 'isimsiz'))));
             collection = self.createNewCollection(collectionName)
             wallType = items.get('duvar_no', 0)
 
@@ -284,6 +296,11 @@ class CreateObject:
             self.collection_move(items.get('x1'), items.get('y1'),
                                  items.get('z1'),
                                  collectionName)
+
+        print('DATA Modül NAMEs \n')
+        print(modulNames)
+        print(len([item for item in modulNames if 'buzdolab' in item[0]]))
+        print(len([item for item in self.data if 'buzdolab' in item.get('modül_adı', '')]))
 
 
 if __name__ == '__main__':
