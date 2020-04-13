@@ -18,7 +18,7 @@ class CreateObject:
     def __init__(self, data):
         self.lastData = []
         if config.get('isTest'):
-            with open('test.json', 'r', encoding='utf-8') as json_file:
+            with open('../test.json', 'r', encoding='utf-8') as json_file:
                 self.data = json.load(json_file)
             self.dataOrganize()
         else:

@@ -5,20 +5,20 @@ import bpy
 import mathutils
 from bpy.app.handlers import persistent
 
-import DatabaseConnection
-import DrawEngine
-from AccessorSettings import Accessor
-from AccessorSettings import BulasikMak
-from AccessorSettings import Buzdolabi
-from AccessorSettings import Firin
-from CreateWallAsideObject import WallOtherSide
-from CreateWalls import Walls
+from Accesories.AccessorSettings import Accessor
+from Accesories.AccessorSettings import BulasikMak
+from Accesories.AccessorSettings import Buzdolabi
+from Accesories.AccessorSettings import Firin
+from DatabaseModel import DatabaseConnection
+from DrawEngineCollector import DrawEngine
+from WallOperation.CreateWallAsideObject import WallOtherSide
+from WallOperation.CreateWalls import Walls
 
-standard_kalinlik = 0.018;
-standard_derinlik = 0.60;
-standard_yukseklik = 0.75;
-standard_genislik = 0.65;
-sahnedeki_objeler = [];
+standard_kalinlik:float = 0.018
+standard_derinlik:float = 0.60
+standard_yukseklik:float = 0.75
+standard_genislik:float = 0.65
+sahnedeki_objeler:list = []
 
 bl_info = {
     "name": "Sargin Render",
@@ -49,21 +49,21 @@ class SarginDraw():
         obj.location = ((x - locationZ), (y - locationX), (z - locationY))
 
     def make_offset(self, obj, yon=1, ust=0, yan=0):
-        x, y, z = obj.dimensions;
+        x, y, z = obj.dimensions
         if ust is not 0:
             if yon is 1:
-                obj.dimensions = (x, y, abs(z - (ust * 2)));
+                obj.dimensions = (x, y, abs(z - (ust * 2)))
             elif yon is 2:
-                obj.dimensions = (x, abs(y - (ust * 2)), z);
+                obj.dimensions = (x, abs(y - (ust * 2)), z)
             elif yon is 3:
-                obj.dimensions = (x, y, abs(z - (ust * 2)));
+                obj.dimensions = (x, y, abs(z - (ust * 2)))
         elif yan is not 0:
             if yon is 1:
-                obj.dimensions = (abs(x - (yan * 2)), y, z);
+                obj.dimensions = (abs(x - (yan * 2)), y, z)
             elif yon is 2:
-                obj.dimensions = (abs(x - (yan * 2)), y, z);
+                obj.dimensions = (abs(x - (yan * 2)), y, z)
             elif yon is 3:
-                obj.dimensions = (x, abs(y - (yan * 2)), z);
+                obj.dimensions = (x, abs(y - (yan * 2)), z)
 
     def drawTezgah(self, isim='mobilyaPlanTezgah', texture='mermer1', yon='3', derinlik=0, modul_genislik=0,
                    kalinlik=1.8,
@@ -88,33 +88,33 @@ class SarginDraw():
                      modul_genislik=0, locationX=0, locationY=0, locationZ=0, isim='Sargın',
                      collection=[],
                      yon=1, texture='wood', wallType='0'):
-        bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False);
+        bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False)
         obj = bpy.context.scene.objects["Cube"]  # Get the object
         bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
         bpy.context.view_layer.objects.active = obj
-        obj.name = str(isim + '_' + str(yon) + '_' + str(randrange(100)));
-        self.assignMaterial(texture, obj);
+        obj.name = str(isim + '_' + str(yon) + '_' + str(randrange(100)))
+        self.assignMaterial(texture, obj)
 
         if yon is 2:  # sağ_yan
-            obj.dimensions = (derinlik, kalinlik, yukseklik);
-            obj.location = (-(derinlik / 2), -(kalinlik / 2), -(yukseklik / 2));
+            obj.dimensions = (derinlik, kalinlik, yukseklik)
+            obj.location = (-(derinlik / 2), -(kalinlik / 2), -(yukseklik / 2))
         elif yon is 3:  # ust
-            obj.dimensions = (derinlik, modul_genislik, kalinlik);
-            obj.location = ((-derinlik / 2), (-modul_genislik / 2), (-kalinlik / 2));
+            obj.dimensions = (derinlik, modul_genislik, kalinlik)
+            obj.location = ((-derinlik / 2), (-modul_genislik / 2), (-kalinlik / 2))
         elif (yon is 1) or (yon is 4):  # kapak
-            obj.dimensions = (kalinlik, modul_genislik, yukseklik);
-            obj.location = (-(kalinlik / 2), -(modul_genislik / 2), -(yukseklik / 2));
+            obj.dimensions = (kalinlik, modul_genislik, yukseklik)
+            obj.location = (-(kalinlik / 2), -(modul_genislik / 2), -(yukseklik / 2))
         else:
-            print('\n');
+            print('\n')
 
         if (locationX is not 0) or (locationY is not 0) or (locationZ is not 0):
-            x, y, z = obj.location;
+            x, y, z = obj.location
             if yon is 1:
-                obj.location = ((x - locationZ), (y - locationX), (z - locationY));
+                obj.location = ((x - locationZ), (y - locationX), (z - locationY))
             elif yon is 3:
-                obj.location = ((x - locationZ), (y - locationX), (z - locationY));
+                obj.location = ((x - locationZ), (y - locationX), (z - locationY))
             else:
-                obj.location = ((x - locationZ), (y - locationX), (z - locationY));
+                obj.location = ((x - locationZ), (y - locationX), (z - locationY))
 
         sahnedeki_objeler.append(obj)
         collection.objects.link(obj)
@@ -126,31 +126,31 @@ class SarginDraw():
         return obj
 
     def collection_move(self, x, y, z, collection_adi):
-        objects_sahne = bpy.data.collections[collection_adi].objects;
+        objects_sahne = bpy.data.collections[collection_adi].objects
 
         for obj in objects_sahne:
-            old_locationX, old_locationY, old_locationZ = obj.location;
-            obj.location = (float(old_locationX - z), float(old_locationY - x), float(old_locationZ - y));
+            old_locationX, old_locationY, old_locationZ = obj.location
+            obj.location = (float(old_locationX - z), float(old_locationY - x), float(old_locationZ - y))
 
     def createNewCollection(self, CollectionName='Yusuf'):
-        collection = bpy.data.collections.new(str(CollectionName));
-        bpy.context.scene.collection.children.link(collection);
-        return bpy.data.collections[CollectionName];
+        collection = bpy.data.collections.new(str(CollectionName))
+        bpy.context.scene.collection.children.link(collection)
+        return bpy.data.collections[CollectionName]
 
     def tezgahOlustur(self, DataCollectionJson, CollectionName='Yusuf'):
-        collection = self.createNewCollection(CollectionName);
+        collection = self.createNewCollection(CollectionName)
 
         for key in DataCollectionJson:
-            wallType = DataCollectionJson.get('duvar_no', '0');
+            wallType = DataCollectionJson.get('duvar_no', '0')
             if key == 'tezgah' and DataCollectionJson[key].get('dahil', False) == True:
                 for data in DataCollectionJson[key]:
                     if type(DataCollectionJson[key].get(data)) == dict and DataCollectionJson[key].get(data).get(
                             'dahil',
                             False) == True:
                         if DataCollectionJson[key].get(data).get('tip') == 3:
-                            genislik = DataCollectionJson[key].get(data).get('boy');
+                            genislik = DataCollectionJson[key].get(data).get('boy')
                         else:
-                            genislik = DataCollectionJson[key].get(data).get('en');
+                            genislik = DataCollectionJson[key].get(data).get('en')
 
                         self.Obje_Olsutur(kalinlik=float(DataCollectionJson[key].get(data).get('kalınlık', 3)),
                                           derinlik=float(DataCollectionJson[key].get(data).get('en')),
@@ -161,15 +161,15 @@ class SarginDraw():
                                           locationZ=float(DataCollectionJson[key].get(data).get('z_1')),
                                           yon=int(DataCollectionJson[key].get(data).get('tip', 3)),
                                           isim=DataCollectionJson[key].get(data).get('adı'), collection=collection,
-                                          texture='mermerBeyaz', wallType=wallType);
+                                          texture='mermerBeyaz', wallType=wallType)
 
     def kutu_Olustur(self, DataCollectionJson, CollectionName='Yusuf'):
-        collection = self.createNewCollection(CollectionName);
+        collection = self.createNewCollection(CollectionName)
         for key in DataCollectionJson.keys():
             wallType = DataCollectionJson.get('duvar_no', '0')
 
             if type(DataCollectionJson[key]) is dict:
-                topOfItem = list(DataCollectionJson[key].keys());
+                topOfItem = list(DataCollectionJson[key].keys())
                 if DataCollectionJson[key].get('dahil', False):
                     # normal sol-sag-raf cizimler
                     for dataName in topOfItem:
@@ -187,12 +187,12 @@ class SarginDraw():
                                         locationY=float(DataCollectionJson[key]['y_1']),
                                         locationZ=float(DataCollectionJson[key]['z_1']),
                                         yon=int(DataCollectionJson[key].get('tip', 1)),
-                                        isim=DataCollectionJson[key]['adı'], collection=collection, wallType=wallType);
+                                        isim=DataCollectionJson[key]['adı'], collection=collection, wallType=wallType)
                                 else:
                                     if DataCollectionJson[key].get('tip') == 3:
-                                        genislik = DataCollectionJson[key].get('boy');
+                                        genislik = DataCollectionJson[key].get('boy')
                                     else:
-                                        genislik = DataCollectionJson[key].get('en');
+                                        genislik = DataCollectionJson[key].get('en')
 
                                     self.Obje_Olsutur(
                                         kalinlik=float(DataCollectionJson[key][dataName].get('kalınlık', 1.8)),
@@ -203,7 +203,7 @@ class SarginDraw():
                                         locationY=float(DataCollectionJson[key]['y_1']),
                                         locationZ=float(DataCollectionJson[key]['z_1']),
                                         yon=int(DataCollectionJson[key].get('tip', 1)),
-                                        isim=DataCollectionJson[key]['adı'], collection=collection, wallType=wallType);
+                                        isim=DataCollectionJson[key]['adı'], collection=collection, wallType=wallType)
 
                 # Üst Ve Alt çizimi için
                 else:
@@ -228,7 +228,7 @@ class SarginDraw():
                                         locationZ=float(DataCollectionJson[key][dataDict]['z_1']),
                                         yon=int(DataCollectionJson[key][dataDict].get('tip', 3)),
                                         isim=DataCollectionJson[key][dataDict]['adı'],
-                                        collection=collection, wallType=wallType);
+                                        collection=collection, wallType=wallType)
 
             elif (type(DataCollectionJson[key]) == list):
                 for element in DataCollectionJson[key]:
@@ -252,7 +252,7 @@ class SarginDraw():
                                             locationZ=float(element[keyData].get('z_1', 0)),
                                             yon=int(element[keyData].get('tip', 2)),
                                             isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                            collection=collection, wallType=wallType);
+                                            collection=collection, wallType=wallType)
                                     elif element[keyData].get('tip', 2) == 1:
                                         self.Obje_Olsutur(kalinlik=element[keyData].get('malzeme', {"mn": 0,
                                                                                                     "kn": 0,
@@ -268,7 +268,7 @@ class SarginDraw():
                                             locationZ=float(element[keyData].get('z_1', 0)),
                                             yon=int(element[keyData].get('tip', 2)),
                                             isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                            collection=collection, wallType=wallType);
+                                            collection=collection, wallType=wallType)
                                     elif element[keyData].get('tip', 2) == 2:
                                         self.Obje_Olsutur(kalinlik=float(element[keyData].get('malzeme', {"mn": 0,
                                                                                                           "kn": 0,
@@ -284,7 +284,7 @@ class SarginDraw():
                                             locationZ=float(element[keyData].get('z_1', 0)),
                                             yon=int(element[keyData].get('tip', 2)),
                                             isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                            collection=collection, wallType=wallType);
+                                            collection=collection, wallType=wallType)
                                     else:
                                         self.Obje_Olsutur(kalinlik=float(element[keyData].get('malzeme', {"mn": 0,
                                                                                                           "kn": 0,
@@ -300,19 +300,19 @@ class SarginDraw():
                                             locationZ=float(element[keyData].get('z_1', 0)),
                                             yon=int(element[keyData].get('tip', 2)),
                                             isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
-                                            collection=collection, wallType=wallType);
+                                            collection=collection, wallType=wallType)
 
     def kameraOlustur(self):
-        bpy.ops.object.camera_add(enter_editmode=False, location=mathutils.Vector((-600.0, -180.0, -160.0)));
+        bpy.ops.object.camera_add(enter_editmode=False, location=mathutils.Vector((-600.0, -180.0, -160.0)))
         bpy.context.view_layer.objects.active = bpy.data.objects['Camera']
         bpy.data.objects['Camera'].rotation_euler = mathutils.Euler(
             (math.radians(-90.0), math.radians(-180.0), math.radians(90.0)), 'XYZ')
 
-        bpy.data.objects['Camera'].data.sensor_width = 50;
+        bpy.data.objects['Camera'].data.sensor_width = 50
 
     def renderAl(self, customerEmail, id):
         scene = bpy.data.scenes['Scene']
-        scene.render.image_settings.file_format = 'PNG';
+        scene.render.image_settings.file_format = 'PNG'
 
         global ImgFilePath
         global CustomerEmail
@@ -321,15 +321,16 @@ class SarginDraw():
 
         CustomerEmail, CustomerID = self.CustomerEmail, self.CustomerId
 
-        ImgFilePath = 'D:\\blenderRenderImage\\' + CustomerEmail + '_' + CustomerID + '.png';
+        ImgFilePath = 'D:\\blenderRenderImage\\' + CustomerEmail + '_' + CustomerID + '.png'
 
         scene.render.filepath = ImgFilePath
         imgName = CustomerEmail + '_' + CustomerID + '.png'
 
-        bpy.ops.render.render(self.afterRender(), 'INVOKE_DEFAULT', write_still=True, use_viewport=True);
+        bpy.ops.render.render(self.afterRender(), 'INVOKE_DEFAULT', write_still=True, use_viewport=True)
         return ImgFilePath
 
-    def afterRender(self):
+    @staticmethod
+    def afterRender():
         window = bpy.context.window_manager.windows[0]
         screen = window.screen
 
@@ -378,10 +379,10 @@ class SarginDraw():
         for o in objects:
             bpy.data.objects.remove(o, do_unlink=True)
 
-    def findMinValues(self):
-        minZVal = 0;
-        minXVal = 0;
-        minYVal = 0;
+    def findMinValues(self) -> dict:
+        minZVal = 0
+        minXVal = 0
+        minYVal = 0
 
         for obj in bpy.data.objects:
             x, y, z = obj.location
@@ -400,10 +401,10 @@ class SarginDraw():
             "minZ": minZVal
         }
 
-    def findMaxValue(self):
-        maxZVal = 0;
-        maxXVal = 0;
-        maxYVal = 0;
+    def findMaxValue(self) -> dict:
+        maxZVal: float = 0
+        maxXVal: float = 0
+        maxYVal: float = 0
 
         for obj in bpy.data.objects:
             x, y, z = obj.location
@@ -455,10 +456,8 @@ class SarginDraw():
             self.isRender = False
             self.deleteAllObject()
             global databaseItem
-            databaseItem = DatabaseConnection.Collection();
-            isEmpty = databaseItem.getDataFromDatabase();
-            mod_isim = [];
-            count = 0;
+            databaseItem = DatabaseConnection.Collection()
+            isEmpty = databaseItem.getDataFromDatabase()
 
             if not isEmpty:
                 self.CustomerId = databaseItem.shortedData[0].get('databaseId')
@@ -469,7 +468,7 @@ class SarginDraw():
                 print('CustomerName: ' + self.CustomerName)
                 print('CustomerEmail: ' + self.CustomerEmail)
 
-                drawEngine = DrawEngine.CreateObject(databaseItem.shortedData[0].get('databaseItems',{}))
+                drawEngine = DrawEngine.CreateObject(databaseItem.shortedData[0].get('databaseItems', {}))
                 drawEngine.dataOrganize()
 
                 wall = Walls()
