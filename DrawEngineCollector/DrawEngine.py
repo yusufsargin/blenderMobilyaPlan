@@ -89,6 +89,7 @@ class CreateObject:
         return {'status': 'FINISH'}
 
     def calculateDraw(self, value, collection, wallType):
+        createdItem = {}
         for keyForSub, valueForSub in value.items():
             if type(valueForSub) == dict and valueForSub.get(
                     'dahil'):
@@ -98,7 +99,7 @@ class CreateObject:
                     Burada sadece kulplar var.
                     Burdan değerler alınıp çizilecek
                     """
-                    self.createdData = {}
+                    createdItem = {}
                 else:
                     # Üst ve Alt Dolaplar için çizim
                     """
@@ -120,7 +121,7 @@ class CreateObject:
                         en = float(valueForSub.get('en', 0))
                         boy = float(valueForSub.get('boy', 0))
 
-                    self.createdData = {
+                    createdItem = {
                         'kalinlik': float(valueForSub.get('malzeme', {"mn": 0,
                                                                       "kn": 0,
                                                                       "adı": "66_Kar Beyaz",
@@ -139,7 +140,7 @@ class CreateObject:
                         'wallType': wallType
                     }
 
-        if value.get('dahil', False) and (value.get('tip', 0) == 1 or value.get('tip', 0) == 4):
+        if value.get('dahil', False) and int((value.get('tip', 0)) == 1 or int(value.get('tip', 0) == 4)):
             """
                 Burada sadece tip 1 yani kapak,baza ve arkalık var. Bunlar dikey ürünler
                 Burdan değerler alınıp çizilecek
@@ -158,37 +159,14 @@ class CreateObject:
                 en = float(value.get('en', 0))
                 boy = float(value.get('boy', 0))
 
-            if value.get('tip', 1) == 3:
-                genislik = boy
-            else:
-                genislik = en
-
             """
             TODO:
                 Sorun burda birden fazla ürün çiziyor.
             """
-            # self.createdData = {
-            #     'kalinlik': float(value.get('malzeme', {"mn": 0,
-            #                                             "kn": 0,
-            #                                             "adı": "66_Kar Beyaz",
-            #                                             "kalınlık": 1.8,
-            #                                             "image": "rgb(255,255,255)"}).get(
-            #         'kalınlık', 1.8)),
-            #     'derinlik': float(en),
-            #     'yukseklik': float(boy),
-            #     'modul_genislik': float(genislik),
-            #     'locationX': float(value.get('x_1', 0)),
-            #     'locationY': float(value.get('y_1', 0)),
-            #     'locationZ': float(value.get('z_1', 0)),
-            #     'yon': int(value.get('tip', 3)),
-            #     'isim': value.get('adı', 'isimsiz'),
-            #     'collection': collection,
-            #     'wallType': wallType
-            # }
 
             if ('baza' in value.get('adı', '')) or ('arka kuşak' in value.get('adı', '')):
                 # print(key, value)
-                self.createdData = {
+                createdItem = {
                     'kalinlik': float(value.get('malzeme', {"mn": 0,
                                                             "kn": 0,
                                                             "adı": "66_Kar Beyaz",
@@ -198,6 +176,25 @@ class CreateObject:
                     'derinlik': float(boy),
                     'yukseklik': float(en),
                     'modul_genislik': float(boy),
+                    'locationX': float(value.get('x_1', 0)),
+                    'locationY': float(value.get('y_1', 0)),
+                    'locationZ': float(value.get('z_1', 0)),
+                    'yon': int(value.get('tip', 3)),
+                    'isim': value.get('adı', 'isimsiz'),
+                    'collection': collection,
+                    'wallType': wallType
+                }
+            else:
+                createdItem = {
+                    'kalinlik': float(value.get('malzeme', {"mn": 0,
+                                                            "kn": 0,
+                                                            "adı": "66_Kar Beyaz",
+                                                            "kalınlık": 1.8,
+                                                            "image": "rgb(255,255,255)"}).get(
+                        'kalınlık', 1.8)),
+                    'derinlik': float(en),
+                    'yukseklik': float(boy),
+                    'modul_genislik': float(en),
                     'locationX': float(value.get('x_1', 0)),
                     'locationY': float(value.get('y_1', 0)),
                     'locationZ': float(value.get('z_1', 0)),
@@ -227,10 +224,7 @@ class CreateObject:
                 en = float(value.get('en', 0))
                 boy = float(value.get('boy', 0))
 
-            if 'kapak2' in value.get('adı', ''):
-                print('KAPAK2******** SAĞ SOL YAN')
-
-            self.createdData = {
+            createdItem = {
                 'kalinlik': float(value.get('malzeme', {"mn": 0,
                                                         "kn": 0,
                                                         "adı": "66_Kar Beyaz",
@@ -249,24 +243,24 @@ class CreateObject:
                 'wallType': wallType
             }
 
-        if len(self.createdData) != 0:
+        if len(createdItem) != 0 and createdItem != {}:
             try:
                 addedObj = (self.Obje_Olsutur(
-                    kalinlik=self.createdData.get('kalinlik', 1.8),
-                    derinlik=self.createdData.get('derinlik', 0),
-                    yukseklik=self.createdData.get('yukseklik', 0),
-                    modul_genislik=self.createdData.get('modul_genislik', 0),
-                    locationX=self.createdData.get('locationX', 0),
-                    locationY=self.createdData.get('locationY', 0),
-                    locationZ=self.createdData.get('locationZ', 0),
-                    yon=self.createdData.get('yon', 0),
-                    isim=self.createdData.get('isim', 0),
-                    collection=self.createdData.get('collection', []),
-                    wallType=self.createdData.get('wallType', 0)))
+                    kalinlik=createdItem.get('kalinlik', 1.8),
+                    derinlik=createdItem.get('derinlik', 0),
+                    yukseklik=createdItem.get('yukseklik', 0),
+                    modul_genislik=createdItem.get('modul_genislik', 0),
+                    locationX=createdItem.get('locationX', 0),
+                    locationY=createdItem.get('locationY', 0),
+                    locationZ=createdItem.get('locationZ', 0),
+                    yon=createdItem.get('yon', 0),
+                    isim=createdItem.get('isim', 0),
+                    collection=createdItem.get('collection', []),
+                    wallType=createdItem.get('wallType', 0)))
                 # Append ListData
                 self.lastData.append(addedObj)
                 # Control Texture Element
-                self.controlTextureObj(self.createdData, addedObj)
+                self.controlTextureObj(createdItem, addedObj)
             except NameError:
                 print(NameError)
             except ValueError:
