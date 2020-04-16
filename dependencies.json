@@ -1,0 +1,5 @@
+{
+  "json": "pip install json",
+  "firabase_admin": "pip install firebase-admin",
+  "pyrebase": "pip install pyrebase"
+}
