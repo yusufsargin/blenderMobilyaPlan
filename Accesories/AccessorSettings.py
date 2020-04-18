@@ -95,6 +95,7 @@ class Accessor:
         kulp = bpy.data.objects[self.getKulpFromStorage()[0]]
         kulpCollection = self.createNewCollection('Kulplar')
 
+        # Birinci duvar için kulplar
         for obj in self.kapakObjWall1:
             dx, dy, dz = obj.dimensions
             kx, ky, kz = obj.location
@@ -116,6 +117,31 @@ class Accessor:
                 else:
                     copyObj = self.copyObject(kulp, kulpCollection)
                     self.setPosition(copyObj, [kx - (cx / 2), ky, kz + (dz / 2) - 3])
+
+        # 2.Duvar için kulplar
+        for obj in self.kapakObjWall2:
+            dx, dy, dz = obj.dimensions
+            kx, ky, kz = obj.location
+
+            copyObj = self.copyObject(kulp, kulpCollection)
+            cx, cy, cz = copyObj.dimensions
+
+            # Boy kapak
+            if (dz - 20) > dy:
+                self.setPosition(copyObj, [kx - (dy / 2) + 3, ky + (dx / 2), kz])
+                self.transformObjRotate(copyObj, 90, 'X')
+                # Geniş kapak
+            else:
+                # Üst dolap
+                if kz > -159:
+                    copyObj = self.copyObject(kulp, kulpCollection)
+                    self.setPosition(copyObj, [kx - (cx / 2), ky + (dx / 2), kz - (dz / 2) + 3])
+                    self.transformObjRotate(copyObj, 90, 'Z')
+                # Alt Dolap
+                else:
+                    copyObj = self.copyObject(kulp, kulpCollection)
+                    self.setPosition(copyObj, [kx - (cx / 2), ky + (dx / 2), kz + (dz / 2) - 3])
+                    self.transformObjRotate(copyObj, 90, 'Z')
 
 
 class Firin(Accessor):
