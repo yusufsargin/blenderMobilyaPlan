@@ -170,7 +170,6 @@ class Firin(Accessor):
         firin.location = (100, 100, 100)
         firinCollection = self.createNewCollection('Firinlar')
 
-        print(self.firinAreaCollection)
         for collection in self.firinAreaCollection:
             if self.verification(collection):
                 copyObj = self.copyObject(firin, firinCollection)
@@ -223,8 +222,6 @@ class Buzdolabi(Accessor):
                 last = ldz - (abs(solYanMinZ) - abs(locationMinBuzZ))
 
                 copyObj.location = (lx, ly - (fdy / 2) - (sdy / 2) - 2, last)
-                print(solYanMinZ)
-                print(locationMinBuzZ)
 
 
 class BulasikMak(Accessor):

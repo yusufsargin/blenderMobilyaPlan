@@ -119,7 +119,6 @@ class WallOtherSide:
                     koseObj = [item for item in bpy.data.objects if 'Kose' in item.name][0]
                     koseMax = koseObj.location.x - (koseObj.dimensions.x / 2)
                     firstObj = [item for item in bpy.data.objects if 'boşluk' in item.name and item.dimensions != 0]
-                    print(firstObj)
                     if len(firstObj) != 0:
                         firstMin = firstObj[0].location.x + (firstObj[0].dimensions.y / 2)
 
@@ -129,7 +128,6 @@ class WallOtherSide:
                         self.transformObjMove(vector=(diff, 0, 0))
 
                         self.selectObj()
-                        print('TRASFORM OBJ')
                         self.transformObjMove(vector=(firstObj[0].dimensions.y, wallY - firstObj[0].location.y, 0))
 
                     return 'SUCCESS'

@@ -18,8 +18,6 @@ class Walls():
             if minYVal < (y - (dY / 2)):
                 minYVal = -(y - (dY / 2))
 
-        print('MIN ' + str(minXVal) + ',' + str(minYVal) + ',' + str(minZVal))
-
         return {
             "minX": minXVal,
             "minY": minYVal,
@@ -41,8 +39,6 @@ class Walls():
                 maxXVal = x - (dX / 2)
             if maxYVal < -(y - (-dY / 2)):
                 maxYVal = -(y + (-dY / 2))
-
-        print('MAX ' + str(maxXVal) + ',' + str(maxYVal) + ',' + str(maxZVal))
 
         return {
             "maxX": maxXVal,

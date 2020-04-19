@@ -63,8 +63,7 @@ class CreateObject:
             obj.dimensions = (kalinlik, modul_genislik, yukseklik)
             obj.location = (-(kalinlik / 2), -(modul_genislik / 2), -(yukseklik / 2))
         else:
-            print('\n')
-
+            pass
         if (locationX != 0) or (locationY != 0) or (locationZ != 0):
             x, y, z = obj.location
 
@@ -110,9 +109,6 @@ class CreateObject:
                         *                  *
                         ********************
                     """
-
-                    if 'kapak2' in valueForSub.get('adı', ''):
-                        print('KAPAK2******** RAF')
 
                     if value.get('cekmeceControl', False):
                         en = float(valueForSub.get('boy', 0))
@@ -165,7 +161,6 @@ class CreateObject:
             """
 
             if ('baza' in value.get('adı', '')) or ('arka kuşak' in value.get('adı', '')):
-                # print(key, value)
                 createdItem = {
                     'kalinlik': float(value.get('malzeme', {"mn": 0,
                                                             "kn": 0,
@@ -290,11 +285,6 @@ class CreateObject:
             self.collection_move(items.get('x1'), items.get('y1'),
                                  items.get('z1'),
                                  collectionName)
-
-        print('DATA Modül NAMEs \n')
-        print(modulNames)
-        print(len([item for item in modulNames if 'buzdolab' in item[0]]))
-        print(len([item for item in self.data if 'buzdolab' in item.get('modül_adı', '')]))
 
 
 if __name__ == '__main__':

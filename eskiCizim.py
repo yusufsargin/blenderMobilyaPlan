@@ -163,3 +163,117 @@ def kutu_Olustur(self, DataCollectionJson, CollectionName='Yusuf'):
                                         yon=int(element[keyData].get('tip', 2)),
                                         isim=element[keyData].get('adı', 'Hatalı_Control_Et'),
                                         collection=collection, wallType=wallType)
+
+
+def getFirinObj(self, element):
+    filepath = "//firin.blend"
+
+    # append all objects starting with 'house'
+    with bpy.data.libraries.load(filepath) as (data_from, data_to):
+        data_to.objects = [name for name in data_from.objects if name.startswith("Firin")]
+
+    # link them to scene
+    scene = bpy.context.scene
+    for obj in data_to.objects:
+        if obj is not None:
+            self.setPostionObj(obj, element.get('x_1'), element.get('y_1'), element.get('z_1'))
+            scene.collection.objects.link(obj)
+
+
+def drawTezgah(self, isim='mobilyaPlanTezgah', texture='mermer1', yon='3', derinlik=0, modul_genislik=0,
+               kalinlik=1.8,
+               locationX=0, locationY=0, locationZ=0, collection=[], wallType='0'):
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    obj = bpy.context.scene.objects['Cube']
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = obj
+    obj.name = str(isim + '_' + str(yon))
+    self.assignMaterial(texture, obj)
+
+    obj.dimensions = (derinlik, modul_genislik, kalinlik)
+    obj.location = ((-derinlik / 2), (-modul_genislik / 2), (-kalinlik / 2))
+
+    x, y, z = obj.location
+    obj.location = ((x - locationZ), (y - locationX), (z - locationY))
+    collection.objects.link(obj)
+    if int(wallType) == 1:
+        self.wall2.append(obj)
+
+def Obje_Olsutur(self, kalinlik=standard_kalinlik, derinlik=standard_derinlik, yukseklik=standard_yukseklik,
+                 modul_genislik=0, locationX=0, locationY=0, locationZ=0, isim='Sargın',
+                 collection=[],
+                 yon=1, texture='wood', wallType='0'):
+    bpy.ops.mesh.primitive_cube_add(size=2, enter_editmode=False)
+    obj = bpy.context.scene.objects["Cube"]  # Get the object
+    bpy.ops.object.select_all(action='DESELECT')  # Deselect all objects
+    bpy.context.view_layer.objects.active = obj
+    obj.name = str(isim + '_' + str(yon) + '_' + str(randrange(100)))
+    self.assignMaterial(texture, obj)
+
+    if yon is 2:  # sağ_yan
+        obj.dimensions = (derinlik, kalinlik, yukseklik)
+        obj.location = (-(derinlik / 2), -(kalinlik / 2), -(yukseklik / 2))
+    elif yon is 3:  # ust
+        obj.dimensions = (derinlik, modul_genislik, kalinlik)
+        obj.location = ((-derinlik / 2), (-modul_genislik / 2), (-kalinlik / 2))
+    elif (yon is 1) or (yon is 4):  # kapak
+        obj.dimensions = (kalinlik, modul_genislik, yukseklik)
+        obj.location = (-(kalinlik / 2), -(modul_genislik / 2), -(yukseklik / 2))
+    else:
+        print('\n')
+
+    if (locationX is not 0) or (locationY is not 0) or (locationZ is not 0):
+        x, y, z = obj.location
+        if yon is 1:
+            obj.location = ((x - locationZ), (y - locationX), (z - locationY))
+        elif yon is 3:
+            obj.location = ((x - locationZ), (y - locationX), (z - locationY))
+        else:
+            obj.location = ((x - locationZ), (y - locationX), (z - locationY))
+
+    sahnedeki_objeler.append(obj)
+    collection.objects.link(obj)
+
+    if int(wallType) == 1 and ('kapak' in obj.name):
+        self.wall2.append(obj)
+    elif int(wallType) == 0 and ('kapak' in obj.name):
+        self.wall1.append(obj)
+    return obj
+
+def collection_move(self, x, y, z, collection_adi):
+    objects_sahne = bpy.data.collections[collection_adi].objects
+
+    for obj in objects_sahne:
+        old_locationX, old_locationY, old_locationZ = obj.location
+        obj.location = (float(old_locationX - z), float(old_locationY - x), float(old_locationZ - y))
+
+def createNewCollection(self, CollectionName='Yusuf'):
+    collection = bpy.data.collections.new(str(CollectionName))
+    bpy.context.scene.collection.children.link(collection)
+    return bpy.data.collections[CollectionName]
+
+
+def assignMaterial(self, textureAdi='test', obj=bpy.context.active_object):
+    obj.data.materials.append(bpy.data.materials[textureAdi])
+
+
+def createNewScene(self):
+    new_scene = bpy.data.scenes.new(name='DENEME')
+    bpy.context.window.scene = new_scene
+
+
+def createWall(self, offSetX, offSetY):
+    bpy.ops.mesh.primitive_plane_add(size=10)
+    obj = bpy.data.objects['Plane']
+    obj.name = 'Wall'
+
+    dx = -self.findMaxValue().get('maxX') + offSetX
+    dy = -self.findMaxValue().get('maxY') + offSetY
+    dz = -self.findMaxValue().get('maxZ')
+
+    obj.dimensions = (dx, dy, dz)
+    obj.location = (
+        self.findMinValues().get('minY'), -(dy / 2) + (offSetY / 2), self.findMaxValue().get('maxZ') + offSetY)
+    obj.rotation_euler = mathutils.Euler(
+        (math.radians(-90.0), math.radians(-180.0), math.radians(90.0)), 'XYZ')
+    obj.data.materials.append(bpy.data.materials['wall'])
