@@ -2,7 +2,7 @@
 
 - Projemizin amacı kullanıcıların (www.mobilyaplan.com) sitemizde çizdikleri çizimlerin
 3d ve gerçekci renderını alabilmelerini sağlamaktır.
-- Blender üzerinden geliştirdiğimiz sistem sayesinde müşteriler internette çizdikleri SVG çizimlerin
+- Geliştirdiğimiz API sayesinde müşteriler internette çizdikleri 2D SVG çizimlerin
 Render görüntülerini dakikalar içerisinde kendilene mail olarak alabileceklerdir.
 
 # Sektörde yeri
@@ -18,7 +18,7 @@ görüntüleri alınabilecektir.
 Kalite dahada artmaktadır.
 
 
-![render](https://firebasestorage.googleapis.com/v0/b/blender-44440.appspot.com/o/MobilyaPlan_CustomerName.png?alt=media&token=5e1256a8-e48c-4dce-ab14-5d379b561102)
+![render](https://firebasestorage.googleapis.com/v0/b/blender-44440.appspot.com/o/sarginlar%40gmail.com_7b5f59c1-66ca-4f79-a68d-bdd6f0c5ba9b.png?alt=media&token=26b59554-afeb-40e2-9dfb-5631f3ef79e6)
 
 - Web sitesi (www.mobilyaplan.com) SVG çizim 
 
